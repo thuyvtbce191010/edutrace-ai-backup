@@ -60,7 +60,8 @@ function setupAdminApp() {
   const tabPanels = {
     tabUsers: document.getElementById("panelTabUsers"),
     tabBookings: document.getElementById("panelTabBookings"),
-    tabSystem: document.getElementById("panelTabSystem")
+    tabSystem: document.getElementById("panelTabSystem"),
+    tabAIKnowledge: document.getElementById("panelTabAIKnowledge")
   };
 
   // User Management Elements
@@ -625,6 +626,607 @@ function setupAdminApp() {
 
   bookingTypeFilter?.addEventListener("change", renderBookingsTable);
   bookingStatusFilter?.addEventListener("change", renderBookingsTable);
+
+  // 7. AI KNOWLEDGE HUB & GEMINI MANAGEMENT
+  function initAdminAIKnowledgeHub() {
+    const btnAdminOpenAddKnowledge = document.getElementById("btnAdminOpenAddKnowledge");
+    const modalAddKnowledgeBackdrop = document.getElementById("modalAddKnowledgeBackdrop");
+    const btnCloseKnowledgeModal = document.getElementById("btnCloseKnowledgeModal");
+    const btnCancelKnowledgeModal = document.getElementById("btnCancelKnowledgeModal");
+    const formAddKnowledge = document.getElementById("formAddKnowledge");
+    const adminKnowledgeTableBody = document.getElementById("adminKnowledgeTableBody");
+    const adminDynKnowledgeCount = document.getElementById("adminDynKnowledgeCount");
+
+    const adminGeminiStatusTitle = document.getElementById("adminGeminiStatusTitle");
+    const adminGeminiStatusSubtitle = document.getElementById("adminGeminiStatusSubtitle");
+    const adminGeminiKeyInput = document.getElementById("adminGeminiKeyInput");
+    const adminGeminiModelSelect = document.getElementById("adminGeminiModelSelect");
+    const btnAdminSaveGeminiKey = document.getElementById("btnAdminSaveGeminiKey");
+    const btnAdminTestGeminiPing = document.getElementById("btnAdminTestGeminiPing");
+
+    // Đồng bộ trạng thái Gemini
+    function syncGeminiEngineStatus() {
+      if (!window.geminiService) return;
+      const isConfigured = window.geminiService.isConfigured();
+      const model = window.geminiService.getModel();
+      const key = window.geminiService.getApiKey();
+
+      if (adminGeminiKeyInput) adminGeminiKeyInput.value = key;
+      if (adminGeminiModelSelect) adminGeminiModelSelect.value = model;
+
+      if (adminGeminiStatusTitle && adminGeminiStatusSubtitle) {
+        if (isConfigured) {
+          adminGeminiStatusTitle.innerHTML = `<span style="color: #0284c7;">🟢 Google ${model}</span> — Đang Chạy Trực Tiếp`;
+          adminGeminiStatusSubtitle.textContent = `Hệ thống sẵn sàng bóc tách triệu chứng và tư vấn đa lượt bằng mô hình ${model}.`;
+        } else {
+          adminGeminiStatusTitle.innerHTML = `<span style="color: #10b981;">⚡ Phác Đồ Bác Sĩ Nhi Cần Thơ</span> — Chế Độ Offline`;
+          adminGeminiStatusSubtitle.textContent = "Chưa nạp Gemini API Key. Đang sử dụng cơ sở tri thức cục bộ M-CHAT & Bác sĩ Ninh Kiều.";
+        }
+      }
+    }
+
+    syncGeminiEngineStatus();
+    window.addEventListener("edutrace:gemini-status-changed", syncGeminiEngineStatus);
+
+    // Lưu API Key & Model từ Admin
+    btnAdminSaveGeminiKey?.addEventListener("click", () => {
+      if (!window.geminiService || !adminGeminiKeyInput) return;
+      const key = adminGeminiKeyInput.value.trim();
+      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : "gemini-1.5-flash";
+
+      window.geminiService.setApiKey(key);
+      window.geminiService.setModel(model);
+      syncGeminiEngineStatus();
+
+      if (key) {
+        showToast(`Đã lưu cấu hình Google ${model}!`);
+      } else {
+        showToast("Đã xóa Key. Chuyển về Chế độ Bác sĩ Cần Thơ (Offline).");
+      }
+    });
+
+    // Test ping từ Admin
+    btnAdminTestGeminiPing?.addEventListener("click", async () => {
+      if (!window.geminiService || !adminGeminiKeyInput) return;
+      const key = adminGeminiKeyInput.value.trim();
+      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : "gemini-1.5-flash";
+
+      if (!key) {
+        showToast("Vui lòng nhập API Key để kiểm tra kết nối!");
+        return;
+      }
+
+      btnAdminTestGeminiPing.disabled = true;
+      btnAdminTestGeminiPing.textContent = "Đang test...";
+
+      try {
+        const res = await window.geminiService.testConnection(key, model);
+        if (res.success) {
+          showToast(`✅ Kết nối thành công tới ${model}! Độ trễ: ${res.latencyMs}ms`);
+        } else {
+          showToast(`❌ Lỗi kết nối: ${res.error}`);
+        }
+      } catch (err) {
+        showToast(`❌ Lỗi test: ${err.message}`);
+      } finally {
+        btnAdminTestGeminiPing.disabled = false;
+        btnAdminTestGeminiPing.textContent = "Live Ping";
+      }
+    });
+
+    // ========================================================================
+    // QUẢN TRỊ TRI THỨC AI KÈM TẢI FILE VÀ TẢI VIDEO HƯỚNG DẪN
+    // ========================================================================
+    let currentAttachedFile = null;
+    let currentAttachedVideo = null;
+
+    // Các phần tử giao diện trong modal tri thức
+    const editKnId = document.getElementById("editKnId");
+    const knTitle = document.getElementById("knTitle");
+    const knCategory = document.getElementById("knCategory");
+    const knAuthor = document.getElementById("knAuthor");
+    const knContent = document.getElementById("knContent");
+    const modalKnowledgeTitle = document.getElementById("modalKnowledgeTitle");
+    const btnSubmitKnowledgeModal = document.getElementById("btnSubmitKnowledgeModal");
+
+    // File Elements
+    const btnKnTabFileUpload = document.getElementById("btnKnTabFileUpload");
+    const btnKnTabFileUrl = document.getElementById("btnKnTabFileUrl");
+    const knFileTabUploadContent = document.getElementById("knFileTabUploadContent");
+    const knFileTabUrlContent = document.getElementById("knFileTabUrlContent");
+    const knFileInput = document.getElementById("knFileInput");
+    const knFileDropzone = document.getElementById("knFileDropzone");
+    const knSelectedFileCard = document.getElementById("knSelectedFileCard");
+    const knSelectedFileName = document.getElementById("knSelectedFileName");
+    const knSelectedFileSize = document.getElementById("knSelectedFileSize");
+    const knFileIconPreview = document.getElementById("knFileIconPreview");
+    const btnRemoveKnFile = document.getElementById("btnRemoveKnFile");
+    const knFileUrl = document.getElementById("knFileUrl");
+    const knFileDescription = document.getElementById("knFileDescription");
+
+    // Video Elements
+    const btnKnTabVideoUrl = document.getElementById("btnKnTabVideoUrl");
+    const btnKnTabVideoUpload = document.getElementById("btnKnTabVideoUpload");
+    const knVideoTabUrlContent = document.getElementById("knVideoTabUrlContent");
+    const knVideoTabUploadContent = document.getElementById("knVideoTabUploadContent");
+    const knVideoUrl = document.getElementById("knVideoUrl");
+    const knVideoUrlPreviewBox = document.getElementById("knVideoUrlPreviewBox");
+    const knVideoUrlThumbImg = document.getElementById("knVideoUrlThumbImg");
+    const knVideoFileInput = document.getElementById("knVideoFileInput");
+    const knVideoDropzone = document.getElementById("knVideoDropzone");
+    const knSelectedVideoCard = document.getElementById("knSelectedVideoCard");
+    const knSelectedVideoName = document.getElementById("knSelectedVideoName");
+    const knSelectedVideoSize = document.getElementById("knSelectedVideoSize");
+    const btnRemoveKnVideo = document.getElementById("btnRemoveKnVideo");
+    const knVideoTitle = document.getElementById("knVideoTitle");
+
+    // Media Preview Modal Elements
+    const modalMediaPreviewBackdrop = document.getElementById("modalMediaPreviewBackdrop");
+    const modalMediaPreviewTitle = document.getElementById("modalMediaPreviewTitle");
+    const modalMediaPreviewContent = document.getElementById("modalMediaPreviewContent");
+    const btnCloseMediaPreviewModal = document.getElementById("btnCloseMediaPreviewModal");
+
+    const closeMediaPreviewModal = () => {
+      if (modalMediaPreviewBackdrop) modalMediaPreviewBackdrop.style.display = "none";
+      if (modalMediaPreviewContent) modalMediaPreviewContent.innerHTML = "";
+    };
+    btnCloseMediaPreviewModal?.addEventListener("click", closeMediaPreviewModal);
+    modalMediaPreviewBackdrop?.addEventListener("click", (e) => {
+      if (e.target === modalMediaPreviewBackdrop) closeMediaPreviewModal();
+    });
+
+    // Chuyển Tab Tải File
+    btnKnTabFileUpload?.addEventListener("click", () => {
+      btnKnTabFileUpload.classList.add("active");
+      btnKnTabFileUrl?.classList.remove("active");
+      if (knFileTabUploadContent) knFileTabUploadContent.style.display = "block";
+      if (knFileTabUrlContent) knFileTabUrlContent.style.display = "none";
+    });
+    btnKnTabFileUrl?.addEventListener("click", () => {
+      btnKnTabFileUrl.classList.add("active");
+      btnKnTabFileUpload?.classList.remove("active");
+      if (knFileTabUrlContent) knFileTabUrlContent.style.display = "block";
+      if (knFileTabUploadContent) knFileTabUploadContent.style.display = "none";
+    });
+
+    // Chuyển Tab Video
+    btnKnTabVideoUrl?.addEventListener("click", () => {
+      btnKnTabVideoUrl.classList.add("active");
+      btnKnTabVideoUpload?.classList.remove("active");
+      if (knVideoTabUrlContent) knVideoTabUrlContent.style.display = "block";
+      if (knVideoTabUploadContent) knVideoTabUploadContent.style.display = "none";
+    });
+    btnKnTabVideoUpload?.addEventListener("click", () => {
+      btnKnTabVideoUpload.classList.add("active");
+      btnKnTabVideoUrl?.classList.remove("active");
+      if (knVideoTabUploadContent) knVideoTabUploadContent.style.display = "block";
+      if (knVideoTabUrlContent) knVideoTabUrlContent.style.display = "none";
+    });
+
+    // Chọn file tài liệu từ máy
+    knFileDropzone?.addEventListener("click", () => knFileInput?.click());
+    knFileDropzone?.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      knFileDropzone.classList.add("dragover");
+    });
+    knFileDropzone?.addEventListener("dragleave", () => knFileDropzone.classList.remove("dragover"));
+    knFileDropzone?.addEventListener("drop", (e) => {
+      e.preventDefault();
+      knFileDropzone.classList.remove("dragover");
+      if (e.dataTransfer.files?.length) {
+        handleFileSelection(e.dataTransfer.files[0]);
+      }
+    });
+    knFileInput?.addEventListener("change", (e) => {
+      if (e.target.files?.length) {
+        handleFileSelection(e.target.files[0]);
+      }
+    });
+
+    function handleFileSelection(file) {
+      if (file.size > 25 * 1024 * 1024) {
+        showToast("⚠️ Tệp quá lớn! Vui lòng chọn tệp nhỏ hơn 25MB.");
+        return;
+      }
+      currentAttachedFile = {
+        fileObject: file,
+        name: file.name,
+        size: file.size,
+        type: file.type || "application/octet-stream",
+        source: "upload"
+      };
+
+      if (knSelectedFileCard) knSelectedFileCard.style.display = "flex";
+      if (knSelectedFileName) knSelectedFileName.textContent = file.name;
+      if (knSelectedFileSize) knSelectedFileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB • Sẵn sàng nạp cho AI`;
+
+      let icon = "📄";
+      if (file.name.endsWith(".pdf")) icon = "📕";
+      else if (file.name.match(/\.(doc|docx)$/i)) icon = "📝";
+      else if (file.name.match(/\.(png|jpg|jpeg|webp)$/i)) icon = "🖼️";
+      if (knFileIconPreview) knFileIconPreview.textContent = icon;
+
+      if (knFileDescription && !knFileDescription.value.trim()) {
+        knFileDescription.value = file.name.replace(/\.[^/.]+$/, "");
+      }
+    }
+
+    btnRemoveKnFile?.addEventListener("click", () => {
+      currentAttachedFile = null;
+      if (knFileInput) knFileInput.value = "";
+      if (knSelectedFileCard) knSelectedFileCard.style.display = "none";
+    });
+
+    // Xử lý link Video YouTube / Web
+    knVideoUrl?.addEventListener("input", (e) => {
+      const url = e.target.value.trim();
+      const ytId = window.parseYouTubeId ? window.parseYouTubeId(url) : null;
+      if (ytId) {
+        if (knVideoUrlPreviewBox) knVideoUrlPreviewBox.style.display = "block";
+        if (knVideoUrlThumbImg) knVideoUrlThumbImg.src = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
+        if (knVideoTitle && !knVideoTitle.value.trim()) {
+          knVideoTitle.value = "Video hướng dẫn thực hành trên YouTube";
+        }
+      } else {
+        if (knVideoUrlPreviewBox) knVideoUrlPreviewBox.style.display = "none";
+      }
+    });
+
+    // Chọn file video từ máy
+    knVideoDropzone?.addEventListener("click", () => knVideoFileInput?.click());
+    knVideoDropzone?.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      knVideoDropzone.classList.add("dragover");
+    });
+    knVideoDropzone?.addEventListener("dragleave", () => knVideoDropzone.classList.remove("dragover"));
+    knVideoDropzone?.addEventListener("drop", (e) => {
+      e.preventDefault();
+      knVideoDropzone.classList.remove("dragover");
+      if (e.dataTransfer.files?.length) {
+        handleVideoSelection(e.dataTransfer.files[0]);
+      }
+    });
+    knVideoFileInput?.addEventListener("change", (e) => {
+      if (e.target.files?.length) {
+        handleVideoSelection(e.target.files[0]);
+      }
+    });
+
+    function handleVideoSelection(file) {
+      if (file.size > 50 * 1024 * 1024) {
+        showToast("⚠️ Video quá lớn! Vui lòng chọn tệp nhỏ hơn 50MB.");
+        return;
+      }
+      currentAttachedVideo = {
+        fileObject: file,
+        name: file.name,
+        size: file.size,
+        type: file.type || "video/mp4",
+        source: "upload"
+      };
+
+      if (knSelectedVideoCard) knSelectedVideoCard.style.display = "flex";
+      if (knSelectedVideoName) knSelectedVideoName.textContent = file.name;
+      if (knSelectedVideoSize) knSelectedVideoSize.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB • Đã sẵn sàng phát cho người dùng`;
+
+      if (knVideoTitle && !knVideoTitle.value.trim()) {
+        knVideoTitle.value = file.name.replace(/\.[^/.]+$/, "");
+      }
+    }
+
+    btnRemoveKnVideo?.addEventListener("click", () => {
+      currentAttachedVideo = null;
+      if (knVideoFileInput) knVideoFileInput.value = "";
+      if (knSelectedVideoCard) knSelectedVideoCard.style.display = "none";
+    });
+
+    // Mở Modal (Chế độ Thêm mới hoặc Sửa)
+    const openKnowledgeModal = (editItem = null) => {
+      currentAttachedFile = null;
+      currentAttachedVideo = null;
+      if (formAddKnowledge) formAddKnowledge.reset();
+      if (knSelectedFileCard) knSelectedFileCard.style.display = "none";
+      if (knSelectedVideoCard) knSelectedVideoCard.style.display = "none";
+      if (knVideoUrlPreviewBox) knVideoUrlPreviewBox.style.display = "none";
+
+      if (editItem) {
+        if (modalKnowledgeTitle) modalKnowledgeTitle.textContent = "Chỉnh Sửa Tri Thức Y Khoa Cho AI";
+        if (editKnId) editKnId.value = editItem.id;
+        if (knTitle) knTitle.value = editItem.title || "";
+        if (knCategory) knCategory.value = editItem.category || "Chậm nói & Ngôn ngữ";
+        if (knAuthor) knAuthor.value = editItem.author || "";
+        if (knContent) knContent.value = editItem.content || "";
+        if (btnSubmitKnowledgeModal) btnSubmitKnowledgeModal.textContent = "Cập Nhật & Nạp Vào Gemini";
+
+        // Khôi phục tệp đã đính kèm nếu có
+        if (editItem.file) {
+          currentAttachedFile = { ...editItem.file };
+          if (editItem.file.source === "url" && editItem.file.url) {
+            btnKnTabFileUrl?.click();
+            if (knFileUrl) knFileUrl.value = editItem.file.url;
+          } else {
+            btnKnTabFileUpload?.click();
+            if (knSelectedFileCard) knSelectedFileCard.style.display = "flex";
+            if (knSelectedFileName) knSelectedFileName.textContent = editItem.file.name;
+            if (knSelectedFileSize) knSelectedFileSize.textContent = "Tệp đã lưu trong bộ nhớ AI";
+          }
+          if (knFileDescription) knFileDescription.value = editItem.file.description || editItem.file.name || "";
+        }
+
+        // Khôi phục video đã đính kèm nếu có
+        if (editItem.video) {
+          currentAttachedVideo = { ...editItem.video };
+          if (editItem.video.source === "url" && editItem.video.url) {
+            btnKnTabVideoUrl?.click();
+            if (knVideoUrl) {
+              knVideoUrl.value = editItem.video.url;
+              knVideoUrl.dispatchEvent(new Event("input"));
+            }
+          } else {
+            btnKnTabVideoUpload?.click();
+            if (knSelectedVideoCard) knSelectedVideoCard.style.display = "flex";
+            if (knSelectedVideoName) knSelectedVideoName.textContent = editItem.video.name || editItem.video.title;
+            if (knSelectedVideoSize) knSelectedVideoSize.textContent = "Video đã lưu trong bộ nhớ AI";
+          }
+          if (knVideoTitle) knVideoTitle.value = editItem.video.title || "";
+        }
+      } else {
+        if (modalKnowledgeTitle) modalKnowledgeTitle.textContent = "Thêm Tri Thức Y Khoa & Tài Liệu / Video Cho AI";
+        if (editKnId) editKnId.value = "";
+        if (btnSubmitKnowledgeModal) btnSubmitKnowledgeModal.textContent = "Lưu & Nạp Vào Gemini";
+        btnKnTabFileUpload?.click();
+        btnKnTabVideoUrl?.click();
+      }
+
+      if (modalAddKnowledgeBackdrop) modalAddKnowledgeBackdrop.style.display = "flex";
+    };
+
+    const closeKnowledgeModal = () => {
+      if (modalAddKnowledgeBackdrop) modalAddKnowledgeBackdrop.style.display = "none";
+      if (formAddKnowledge) formAddKnowledge.reset();
+      currentAttachedFile = null;
+      currentAttachedVideo = null;
+    };
+
+    btnAdminOpenAddKnowledge?.addEventListener("click", () => openKnowledgeModal(null));
+    btnCloseKnowledgeModal?.addEventListener("click", closeKnowledgeModal);
+    btnCancelKnowledgeModal?.addEventListener("click", closeKnowledgeModal);
+
+    // Xử lý Submit Form (Lưu hoặc Cập nhật)
+    formAddKnowledge?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = editKnId ? editKnId.value : "";
+      const title = knTitle?.value.trim();
+      const category = knCategory?.value;
+      const author = knAuthor?.value.trim();
+      const content = knContent?.value.trim();
+
+      if (!title || !content) {
+        showToast("Vui lòng điền đầy đủ tiêu đề và nội dung tri thức!");
+        return;
+      }
+
+      if (btnSubmitKnowledgeModal) {
+        btnSubmitKnowledgeModal.disabled = true;
+        btnSubmitKnowledgeModal.textContent = "Đang nạp tri thức & tệp...";
+      }
+
+      try {
+        // 1. Chuẩn bị thông tin File
+        let fileData = null;
+        if (currentAttachedFile && currentAttachedFile.fileObject) {
+          const storageKey = `kn_file_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          if (window.saveMediaBlob) {
+            await window.saveMediaBlob(storageKey, currentAttachedFile.fileObject);
+          }
+          fileData = {
+            name: currentAttachedFile.name,
+            size: currentAttachedFile.size,
+            type: currentAttachedFile.type,
+            source: "upload",
+            storageKey: storageKey,
+            description: knFileDescription?.value.trim() || currentAttachedFile.name
+          };
+        } else if (knFileUrl && knFileUrl.value.trim()) {
+          fileData = {
+            name: knFileDescription?.value.trim() || "Tài liệu trực tuyến",
+            source: "url",
+            url: knFileUrl.value.trim(),
+            description: knFileDescription?.value.trim() || ""
+          };
+        } else if (currentAttachedFile && !currentAttachedFile.fileObject) {
+          // Giữ nguyên file cũ nếu đang sửa
+          fileData = currentAttachedFile;
+          if (knFileDescription) fileData.description = knFileDescription.value.trim();
+        }
+
+        // 2. Chuẩn bị thông tin Video
+        let videoData = null;
+        if (currentAttachedVideo && currentAttachedVideo.fileObject) {
+          const storageKey = `kn_video_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          if (window.saveMediaBlob) {
+            await window.saveMediaBlob(storageKey, currentAttachedVideo.fileObject);
+          }
+          videoData = {
+            title: knVideoTitle?.value.trim() || currentAttachedVideo.name,
+            source: "upload",
+            storageKey: storageKey,
+            size: currentAttachedVideo.size,
+            duration: "Video tải lên"
+          };
+        } else if (knVideoUrl && knVideoUrl.value.trim()) {
+          const vUrl = knVideoUrl.value.trim();
+          const ytId = window.parseYouTubeId ? window.parseYouTubeId(vUrl) : null;
+          videoData = {
+            title: knVideoTitle?.value.trim() || "Video hướng dẫn thực hành",
+            source: "url",
+            url: vUrl,
+            youtubeId: ytId,
+            duration: ytId ? "YouTube" : "Video Web"
+          };
+        } else if (currentAttachedVideo && !currentAttachedVideo.fileObject) {
+          // Giữ nguyên video cũ nếu đang sửa
+          videoData = currentAttachedVideo;
+          if (knVideoTitle) videoData.title = knVideoTitle.value.trim();
+        }
+
+        // 3. Lưu vào Storage
+        const payload = {
+          title,
+          category,
+          author,
+          content,
+          file: fileData,
+          video: videoData
+        };
+
+        if (id && window.updateDynamicKnowledge) {
+          window.updateDynamicKnowledge(id, payload);
+          showToast("Đã cập nhật tri thức và tệp/video cho AI thành công!");
+        } else if (window.saveDynamicKnowledge) {
+          window.saveDynamicKnowledge(payload);
+          showToast("Đã nạp tri thức, tệp và video vào Gemini AI thành công!");
+        }
+
+        closeKnowledgeModal();
+        renderAdminKnowledgeList();
+      } catch (err) {
+        console.error("Lỗi khi lưu tri thức:", err);
+        showToast("❌ Gặp lỗi khi lưu tri thức: " + err.message);
+      } finally {
+        if (btnSubmitKnowledgeModal) {
+          btnSubmitKnowledgeModal.disabled = false;
+          btnSubmitKnowledgeModal.textContent = "Lưu & Nạp Vào Gemini";
+        }
+      }
+    });
+
+    // Render danh sách tri thức tùy biến ra bảng
+    function renderAdminKnowledgeList() {
+      if (!adminKnowledgeTableBody || !window.getStoredDynamicKnowledge) return;
+      const list = window.getStoredDynamicKnowledge();
+
+      if (adminDynKnowledgeCount) {
+        adminDynKnowledgeCount.textContent = list.length;
+      }
+
+      if (list.length === 0) {
+        adminKnowledgeTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 36px; color: #94a3b8;">
+              Chưa có tri thức tùy biến nào do Admin thêm. Nhấn "+ Thêm Tri Thức Mới" để bổ sung chuyên môn, tải file tài liệu và video minh họa.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      adminKnowledgeTableBody.innerHTML = list.map((item) => {
+        // Render huy hiệu tệp đính kèm
+        let mediaHtml = '<div style="display: flex; flex-direction: column; gap: 4px;">';
+        if (item.file) {
+          const fileName = item.file.name || "Tài liệu";
+          const shortName = fileName.length > 18 ? fileName.slice(0, 15) + "..." : fileName;
+          mediaHtml += `
+            <button type="button" class="btn-preview-file" data-id="${item.id}" title="Bấm để xem/tải: ${fileName}">
+              📄 ${shortName}
+            </button>
+          `;
+        }
+        if (item.video) {
+          const vTitle = item.video.title || "Video";
+          const shortTitle = vTitle.length > 18 ? vTitle.slice(0, 15) + "..." : vTitle;
+          mediaHtml += `
+            <button type="button" class="btn-preview-video" data-id="${item.id}" title="Bấm để xem thử: ${vTitle}">
+              🎬 ${item.video.youtubeId ? "YouTube" : "Video"}: ${shortTitle}
+            </button>
+          `;
+        }
+        if (!item.file && !item.video) {
+          mediaHtml += `<span style="font-size: 0.74rem; color: #94a3b8; font-style: italic;">Chưa có</span>`;
+        }
+        mediaHtml += "</div>";
+
+        return `
+          <tr>
+            <td>
+              <strong>${item.title}</strong>
+              <div style="font-size: 0.72rem; color: #94a3b8;">ID: ${item.id}</div>
+            </td>
+            <td>
+              <span class="user-role-badge role-doctor" style="font-size: 0.76rem;">${item.category}</span>
+            </td>
+            <td>
+              <div style="font-size: 0.82rem; color: #475569; max-width: 320px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${item.content}
+              </div>
+            </td>
+            <td>
+              ${mediaHtml}
+            </td>
+            <td>
+              <span style="font-size: 0.82rem; color: #1e3a8a; font-weight: 600;">${item.author || "Quản trị viên"}</span>
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button type="button" class="btn btn-sm btn-outline-light btn-edit-knowledge" data-id="${item.id}" style="color: #0284c7; border-color: #bae6fd; margin-right: 6px;">
+                Sửa
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-light btn-delete-knowledge" data-id="${item.id}" style="color: #ef4444; border-color: #fca5a5;">
+                Xóa
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      // Nút Sửa
+      adminKnowledgeTableBody.querySelectorAll(".btn-edit-knowledge").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          const target = list.find((k) => k.id === id);
+          if (target) openKnowledgeModal(target);
+        });
+      });
+
+      // Nút Xóa
+      adminKnowledgeTableBody.querySelectorAll(".btn-delete-knowledge").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          if (confirm("Bạn có chắc chắn muốn xóa mục tri thức này (kèm tệp và video) khỏi bộ nhớ AI?")) {
+            if (window.deleteDynamicKnowledge) {
+              window.deleteDynamicKnowledge(id);
+              showToast("Đã xóa mục tri thức và tệp đính kèm!");
+              renderAdminKnowledgeList();
+            }
+          }
+        });
+      });
+
+      // Xem/Tải tệp
+      adminKnowledgeTableBody.querySelectorAll(".btn-preview-file").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          if (window.downloadKnowledgeFile) {
+            window.downloadKnowledgeFile(id);
+          }
+        });
+      });
+
+      // Xem video
+      adminKnowledgeTableBody.querySelectorAll(".btn-preview-video").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          if (window.openKnowledgeVideoPlayer) {
+            window.openKnowledgeVideoPlayer(id);
+          }
+        });
+      });
+    }
+
+    renderAdminKnowledgeList();
+  }
+
+  initAdminAIKnowledgeHub();
 
   // Initialize service
   initAuthService();
