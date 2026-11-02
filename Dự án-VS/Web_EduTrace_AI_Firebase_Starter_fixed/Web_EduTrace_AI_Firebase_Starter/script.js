@@ -968,6 +968,7 @@ function renderScenario(data) {
 }
 
 function renderKeywordsAndAdvice(keywords, advice, ageGroup) {
+  const escapeText = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const container = document.getElementById('aiAnalysisKeywords');
   const adviceEl = document.getElementById('aiAdviceText');
 
@@ -976,12 +977,12 @@ function renderKeywordsAndAdvice(keywords, advice, ageGroup) {
       let cls = 'keyword-tag';
       if (kw.type === 'age') cls += ' tag-age';
       if (kw.type === 'mchat') cls += ' tag-mchat';
-      return `<span class="${cls}">${kw.text}</span>`;
+      return `<span class="${cls}">${escapeText(kw.text)}</span>`;
     }).join('');
   }
 
   if (adviceEl) {
-    let formattedAdvice = advice
+    let formattedAdvice = escapeText(advice)
       .replace(/\[kn-video:([a-zA-Z0-9_-]+)\]/gi, (m, id) => {
         return `<span class="badge-kn-ref" onclick="window.openKnowledgeVideoPlayer('${id}')" title="Bấm để xem video">🎬 Xem Video Hướng Dẫn</span>`;
       })
@@ -1483,8 +1484,9 @@ function showToast(message) {
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
       <polyline points="22 4 12 14.01 9 11.01"></polyline>
     </svg>
-    <span>${message}</span>
+    <span></span>
   `;
+  toast.querySelector('span').textContent = message;
 
   toast.classList.add('show');
   setTimeout(() => {

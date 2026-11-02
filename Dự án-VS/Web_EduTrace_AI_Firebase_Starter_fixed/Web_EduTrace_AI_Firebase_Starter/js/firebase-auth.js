@@ -26,9 +26,19 @@ import {
   deleteDoc,
   collection,
   getDocs,
+  query,
+  orderBy,
+  documentId,
+  limit,
+  startAfter,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig, firebaseConfigured } from "./firebase-config.js";
+import { createCloudPager } from "./cloud-page.js";
+import { resolveRole } from "./auth-role.js";
+
+// Simulated authentication is disabled in the normal application.
+const ENABLE_DEMO_AUTH = false;
 
 // Initialize Firebase App singleton safely
 let app = null;
@@ -215,7 +225,7 @@ async function fetchUserProfileFromFirestore(uid) {
 export function initAuthService() {
   // First load cached user from localStorage for instant render
   const cached = loadLocalUser();
-  if (cached) {
+  if (ENABLE_DEMO_AUTH && cached?.isDemo) {
     currentAuthUser = cached;
     notifySubscribers();
   }
@@ -224,13 +234,16 @@ export function initAuthService() {
   if (auth) {
     onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
+        try {
         // Fetch Firestore profile or merge with cached data
         let extraProfile = await fetchUserProfileFromFirestore(fbUser.uid);
         if (!extraProfile && cached && cached.uid === fbUser.uid) {
           extraProfile = cached;
         }
 
-        const role = extraProfile?.role || "parent";
+        const token = await fbUser.getIdTokenResult();
+        if (auth.currentUser?.uid !== fbUser.uid) return;
+        const role = resolveRole(extraProfile?.role, token.claims);
         currentAuthUser = {
           uid: fbUser.uid,
           email: fbUser.email,
@@ -238,15 +251,22 @@ export function initAuthService() {
           phone: extraProfile?.phone || fbUser.phoneNumber || "",
           photoURL: fbUser.photoURL || null,
           role: role,
+          isAdmin: token.claims.admin === true,
           roleLabel: ROLE_LABELS[role] || "Phụ huynh",
           isDemo: false,
           createdAt: fbUser.metadata?.creationTime || new Date().toISOString()
         };
         saveLocalUser(currentAuthUser);
         notifySubscribers();
+        } catch (error) {
+          console.error("Không xác minh được phiên đăng nhập:", error);
+          currentAuthUser = null;
+          saveLocalUser(null);
+          notifySubscribers();
+        }
       } else {
         // Only clear if not in an active demo session
-        if (currentAuthUser && !currentAuthUser.isDemo) {
+        if (!ENABLE_DEMO_AUTH || (currentAuthUser && !currentAuthUser.isDemo)) {
           currentAuthUser = null;
           saveLocalUser(null);
           notifySubscribers();
@@ -261,7 +281,7 @@ export async function registerWithEmail({ email, password, fullName, phone, role
   email = email.trim();
   fullName = fullName.trim();
   phone = phone.trim();
-  role = role || "parent";
+  role = resolveRole(role);
 
   // Try real Firebase Auth first
   if (auth) {
@@ -301,7 +321,7 @@ export async function registerWithEmail({ email, password, fullName, phone, role
       return { success: true, user: currentAuthUser };
     } catch (error) {
       // If Firebase Auth provider is disabled in Console, provide seamless Demo fallback
-      if (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found") {
+      if (ENABLE_DEMO_AUTH && (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found")) {
         console.warn("Firebase Auth disabled in Console. Falling back to simulated demo account.");
         return createSimulatedUser({ email, fullName, phone, role });
       }
@@ -310,7 +330,8 @@ export async function registerWithEmail({ email, password, fullName, phone, role
   }
 
   // Fallback demo mode if Firebase is unconfigured
-  return createSimulatedUser({ email, fullName, phone, role });
+  if (ENABLE_DEMO_AUTH) return createSimulatedUser({ email, fullName, phone, role });
+  throw new Error("Firebase Authentication chưa được cấu hình.");
 }
 
 function createSimulatedUser({ email, fullName, phone, role }) {
@@ -339,7 +360,7 @@ export async function loginWithEmail({ email, password }) {
   email = email.trim().toLowerCase();
 
   // Check if user requested one of our pre-configured fast test accounts
-  if (DEMO_PRESET_ACCOUNTS[email]) {
+  if (ENABLE_DEMO_AUTH && DEMO_PRESET_ACCOUNTS[email]) {
     // If password matches or user tests quickly
     const preset = DEMO_PRESET_ACCOUNTS[email];
     currentAuthUser = { ...preset };
@@ -355,7 +376,8 @@ export async function loginWithEmail({ email, password }) {
       const fbUser = userCredential.user;
 
       const profile = await fetchUserProfileFromFirestore(fbUser.uid);
-      const role = profile?.role || "parent";
+      const token = await fbUser.getIdTokenResult();
+      const role = resolveRole(profile?.role, token.claims);
 
       currentAuthUser = {
         uid: fbUser.uid,
@@ -364,6 +386,7 @@ export async function loginWithEmail({ email, password }) {
         phone: profile?.phone || fbUser.phoneNumber || "",
         photoURL: fbUser.photoURL || null,
         role: role,
+        isAdmin: token.claims.admin === true,
         roleLabel: ROLE_LABELS[role] || "Phụ huynh",
         isDemo: false,
         createdAt: fbUser.metadata?.creationTime || new Date().toISOString()
@@ -373,7 +396,7 @@ export async function loginWithEmail({ email, password }) {
       notifySubscribers();
       return { success: true, user: currentAuthUser };
     } catch (error) {
-      if (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found") {
+      if (ENABLE_DEMO_AUTH && (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found")) {
         console.warn("Firebase Auth disabled in Console. Falling back to demo mode.");
         return createSimulatedUser({ email, fullName: email.split("@")[0], phone: "", role: "parent" });
       }
@@ -382,7 +405,8 @@ export async function loginWithEmail({ email, password }) {
   }
 
   // Fallback demo mode
-  return createSimulatedUser({ email, fullName: email.split("@")[0], phone: "", role: "parent" });
+  if (ENABLE_DEMO_AUTH) return createSimulatedUser({ email, fullName: email.split("@")[0], phone: "", role: "parent" });
+  throw new Error("Firebase Authentication chưa được cấu hình.");
 }
 
 // GOOGLE SIGN IN
@@ -395,7 +419,8 @@ export async function loginWithGoogle() {
       const fbUser = result.user;
 
       let profile = await fetchUserProfileFromFirestore(fbUser.uid);
-      const role = profile?.role || "parent";
+      const token = await fbUser.getIdTokenResult();
+      const role = resolveRole(profile?.role, token.claims);
 
       currentAuthUser = {
         uid: fbUser.uid,
@@ -404,6 +429,7 @@ export async function loginWithGoogle() {
         phone: fbUser.phoneNumber || profile?.phone || "",
         photoURL: fbUser.photoURL || null,
         role: role,
+        isAdmin: token.claims.admin === true,
         roleLabel: ROLE_LABELS[role] || "Phụ huynh",
         isDemo: false,
         createdAt: fbUser.metadata?.creationTime || new Date().toISOString()
@@ -413,7 +439,7 @@ export async function loginWithGoogle() {
         uid: fbUser.uid,
         email: fbUser.email,
         displayName: currentAuthUser.displayName,
-        role: currentAuthUser.role,
+        role: profile?.role && profile.role !== "admin" ? profile.role : "parent",
         photoURL: currentAuthUser.photoURL
       });
 
@@ -424,7 +450,7 @@ export async function loginWithGoogle() {
       if (error.code === "auth/popup-closed-by-user") {
         throw error;
       }
-      if (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found") {
+      if (ENABLE_DEMO_AUTH && (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found")) {
         console.warn("Google Auth not enabled in Console. Simulating demo Google login.");
         const simulated = {
           uid: "demo-google-user",
@@ -448,6 +474,7 @@ export async function loginWithGoogle() {
   }
 
   // Fallback demo mode
+  if (!ENABLE_DEMO_AUTH) throw new Error("Firebase Authentication chưa được cấu hình.");
   return createSimulatedUser({
     email: "google.user@gmail.com",
     fullName: "Tài Khoản Google (Demo)",
@@ -464,13 +491,14 @@ export async function resetPassword(email) {
       await sendPasswordResetEmail(auth, email);
       return { success: true };
     } catch (error) {
-      if (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found") {
+      if (ENABLE_DEMO_AUTH && (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found")) {
         return { success: true, isDemo: true };
       }
       throw error;
     }
   }
-  return { success: true, isDemo: true };
+  if (ENABLE_DEMO_AUTH) return { success: true, isDemo: true };
+  throw new Error("Firebase Authentication chưa được cấu hình.");
 }
 
 // UPDATE USER PROFILE
@@ -480,8 +508,8 @@ export async function updateUserProfile({ displayName, phone, role }) {
   currentAuthUser.displayName = displayName || currentAuthUser.displayName;
   if (phone !== undefined) currentAuthUser.phone = phone;
   if (role) {
-    currentAuthUser.role = role;
-    currentAuthUser.roleLabel = ROLE_LABELS[role] || "Phụ huynh";
+    currentAuthUser.role = currentAuthUser.isAdmin ? "admin" : resolveRole(role);
+    currentAuthUser.roleLabel = ROLE_LABELS[currentAuthUser.role] || "Phụ huynh";
   }
 
   saveLocalUser(currentAuthUser);
@@ -530,12 +558,13 @@ export function getUserActivities() {
   }
 }
 
-export function recordUserActivity(type, data) {
+export function recordUserActivity(type, data, cloudId = null) {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_ACTIVITIES_KEY);
     const list = raw ? JSON.parse(raw) : [];
     const item = {
-      id: "act-" + Date.now(),
+      id: cloudId || "act-" + Date.now(),
+      cloud: Boolean(cloudId),
       type: type, // 'consultation' or 'booking'
       userEmail: currentAuthUser ? currentAuthUser.email : null,
       userName: currentAuthUser ? currentAuthUser.displayName : null,
@@ -745,6 +774,7 @@ export async function saveUserByAdmin(userData) {
       console.info("Đã lưu người dùng vào Cloud Firestore:", uid);
     } catch (dbErr) {
       console.warn("Lưu Firestore Database bị từ chối hoặc lỗi mạng:", dbErr.code || dbErr.message);
+      throw dbErr;
     }
   }
 
@@ -763,7 +793,6 @@ export async function saveUserByAdmin(userData) {
 export async function deleteUserByAdmin(uid) {
   const list = getAllUsersList();
   const filtered = list.filter(u => u.uid !== uid);
-  localStorage.setItem(LOCAL_STORAGE_USERS_LIST_KEY, JSON.stringify(filtered));
 
   if (db && uid) {
     try {
@@ -771,51 +800,80 @@ export async function deleteUserByAdmin(uid) {
       console.info("Đã xóa người dùng khỏi Firestore Database:", uid);
     } catch (err) {
       console.warn("Xóa người dùng Firestore skipped:", err.code || err.message);
+      throw err;
     }
   }
+  localStorage.setItem(LOCAL_STORAGE_USERS_LIST_KEY, JSON.stringify(filtered));
   return true;
 }
 
-export async function toggleUserStatusByAdmin(uid) {
+export async function toggleUserStatusByAdmin(uid, currentStatus) {
   const list = getAllUsersList();
-  const user = list.find(u => u.uid === uid);
+  const user = list.find(u => u.uid === uid) || (currentStatus ? { uid, status: currentStatus } : null);
   if (user) {
-    user.status = user.status === "blocked" ? "active" : "blocked";
-    user.updatedAt = new Date().toLocaleString("vi-VN");
-    localStorage.setItem(LOCAL_STORAGE_USERS_LIST_KEY, JSON.stringify(list));
+    const newStatus = (currentStatus ?? user.status) === "blocked" ? "active" : "blocked";
 
     if (db && uid) {
       try {
         await updateDoc(doc(db, "users", uid), {
-          status: user.status,
+          status: newStatus,
           updatedAt: serverTimestamp()
         });
         console.info("Đã cập nhật trạng thái người dùng trong Firestore Database:", uid);
       } catch (err) {
         console.warn("Cập nhật trạng thái Firestore skipped:", err.code || err.message);
+        throw err;
       }
     }
+    user.status = newStatus;
+    user.updatedAt = new Date().toLocaleString("vi-VN");
+    localStorage.setItem(LOCAL_STORAGE_USERS_LIST_KEY, JSON.stringify(list));
     return user;
   }
   return null;
 }
 
-// Fetch all users from Firestore Database and sync to local cache
-export async function syncUsersWithFirestore() {
+const fetchCloudPage = async (name, cursor, pageSize) => {
+  const constraints = [orderBy(documentId()), limit(pageSize)];
+  if (cursor) constraints.push(startAfter(cursor));
+  return (await getDocs(query(collection(db, name), ...constraints))).docs;
+};
+const usersPager = createCloudPager(["users"], fetchCloudPage);
+const activitiesPager = createCloudPager(["leads", "bookingRequests"], fetchCloudPage);
+
+// Export reads cloud data directly without browser-only demo records.
+export async function fetchAllCloudUsers() {
+  if (!db) throw new Error("Firebase chưa được cấu hình hoặc khởi tạo.");
+  const pager = createCloudPager(["users"], fetchCloudPage);
+  const users = [];
+  let hasMore = true;
+  while (hasMore) {
+    const result = await pager.next();
+    for (const item of result.pages.users || []) {
+      const data = item.data();
+      users.push({ ...data, uid: item.id, createdAt: data.createdAt?.toDate
+        ? data.createdAt.toDate().toLocaleString("vi-VN") : (data.createdAt || "") });
+    }
+    hasMore = result.hasMore;
+  }
+  return users;
+}
+
+// Fetch one cloud page and merge it into the local list.
+export async function syncUsersWithFirestore({ reset = false } = {}) {
   if (!db) {
     return { success: false, reason: "no-db", users: getAllUsersList(), cloudCount: 0 };
   }
   try {
-    const snap = await getDocs(collection(db, "users"));
+    if (reset) usersPager.reset();
+    const { pages, hasMore } = await usersPager.next();
+    const docs = pages.users || [];
     const localList = getAllUsersList();
-    if (snap.empty) {
-      return { success: true, users: localList, cloudCount: 0, newAdded: 0 };
-    }
 
     let newAddedCount = 0;
     let updatedCount = 0;
 
-    snap.forEach((docSnap) => {
+    docs.forEach((docSnap) => {
       const data = docSnap.data();
       let createdStr = "Mới tạo";
       if (data.createdAt?.toDate) {
@@ -852,7 +910,8 @@ export async function syncUsersWithFirestore() {
     return {
       success: true,
       users: localList,
-      cloudCount: snap.size,
+      cloudCount: docs.length,
+      hasMore,
       newAdded: newAddedCount,
       updated: updatedCount
     };
@@ -869,65 +928,63 @@ export async function syncUsersWithFirestore() {
 }
 
 // Sync leads and bookings from Firestore to local cache
-export async function syncActivitiesWithFirestore() {
-  if (!db) return getAllLeadsAndBookings();
+export async function syncActivitiesWithFirestore({ reset = false } = {}) {
+  if (!db) throw new Error("Firebase chưa được cấu hình hoặc khởi tạo.");
   const list = getAllLeadsAndBookings();
   let updated = false;
 
-  try {
-    const leadsSnap = await getDocs(collection(db, "leads"));
-    leadsSnap.forEach((docSnap) => {
+  if (reset) activitiesPager.reset();
+  const { pages, hasMore } = await activitiesPager.next();
+  (pages.leads || []).forEach((docSnap) => {
       const d = docSnap.data();
-      if (!list.some((item) => item.id === docSnap.id)) {
+      {
         let createdStr = new Date().toLocaleString("vi-VN");
         if (d.createdAt?.toDate) {
           createdStr = d.createdAt.toDate().toLocaleString("vi-VN");
         }
-        list.unshift({
+        const entry = {
           id: docSnap.id,
+          cloud: true,
           type: "consultation",
           userEmail: d.email || "",
           userName: d.name || "Khách hàng",
           status: d.status || "pending",
           createdAt: createdStr,
           data: d
-        });
+        };
+        const idx = list.findIndex(item => item.id === docSnap.id && item.type === "consultation");
+        if (idx < 0) list.unshift(entry); else list[idx] = { ...list[idx], ...entry };
         updated = true;
       }
     });
-  } catch (e) {
-    // leads query might be restricted
-  }
 
-  try {
-    const bookingsSnap = await getDocs(collection(db, "bookingRequests"));
-    bookingsSnap.forEach((docSnap) => {
+  (pages.bookingRequests || []).forEach((docSnap) => {
       const d = docSnap.data();
-      if (!list.some((item) => item.id === docSnap.id)) {
+      {
         let createdStr = new Date().toLocaleString("vi-VN");
         if (d.createdAt?.toDate) {
           createdStr = d.createdAt.toDate().toLocaleString("vi-VN");
         }
-        list.unshift({
+        const entry = {
           id: docSnap.id,
+          cloud: true,
           type: "booking",
           userEmail: d.email || "",
           userName: d.parentName || "Phụ huynh",
           status: d.status || "pending",
           createdAt: createdStr,
           data: d
-        });
+        };
+        const idx = list.findIndex(item => item.id === docSnap.id && item.type === "booking");
+        if (idx < 0) list.unshift(entry); else list[idx] = { ...list[idx], ...entry };
         updated = true;
       }
     });
-  } catch (e) {
-    // bookings query might be restricted
-  }
 
   if (updated) {
     localStorage.setItem(LOCAL_STORAGE_ACTIVITIES_KEY, JSON.stringify(list));
   }
-  return list;
+  return { list, hasMore, cloudCount: (pages.leads || []).length + (pages.bookingRequests || []).length };
 }
 
 export function getAllLeadsAndBookings() {
@@ -993,19 +1050,18 @@ export function getAllLeadsAndBookings() {
   }
 }
 
-export function updateActivityStatus(actId, newStatus) {
-  try {
+export async function updateActivityStatus(actId, type, newStatus) {
+  if (!["pending", "contacted", "confirmed"].includes(newStatus)) throw new Error("Trạng thái không hợp lệ.");
     const raw = localStorage.getItem(LOCAL_STORAGE_ACTIVITIES_KEY);
     const list = raw ? JSON.parse(raw) : [];
-    const item = list.find(i => i.id === actId);
+    const item = list.find(i => i.id === actId && i.type === type);
     if (item) {
+      if (!item.cloud || !db) throw new Error("Không thể đồng bộ yêu cầu chỉ lưu trên trình duyệt.");
+      await updateDoc(doc(db, type === "booking" ? "bookingRequests" : "leads", actId), { status: newStatus });
       item.status = newStatus;
       localStorage.setItem(LOCAL_STORAGE_ACTIVITIES_KEY, JSON.stringify(list));
       return item;
     }
     return null;
-  } catch {
-    return null;
-  }
 }
 

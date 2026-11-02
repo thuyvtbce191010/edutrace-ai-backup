@@ -18,6 +18,7 @@
   <!-- Base & Admin Styles -->
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="admin-pagination.css">
 </head>
 
 <body class="admin-body">
@@ -27,13 +28,13 @@
        ========================================================================== -->
   <header class="admin-header">
     <div style="display: flex; align-items: center; gap: 20px;">
-      <a href="index.html" class="admin-header-brand">
+      <div class="admin-header-brand">
         <div class="admin-logo-badge">E</div>
         <div class="admin-header-title">
           <h2>EduTrace <span>AI</span></h2>
           <span>Admin Portal • Quản Trị Hệ Thống</span>
         </div>
-      </a>
+      </div>
     </div>
 
     <div class="admin-header-actions">
@@ -41,13 +42,6 @@
         <span class="admin-pulse-dot"></span>
         <span>Hệ Thống Trực Tuyến</span>
       </div>
-      <a href="index.html" class="btn-back-website">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-        <span>Về Trang Chủ</span>
-      </a>
-
       <!-- Admin Profile Pill -->
       <div id="adminHeaderUserPill" style="display: none; align-items: center; gap: 10px;">
         <div class="nav-user-pill" style="cursor: default;">
@@ -96,7 +90,7 @@
       </form>
 
       <!-- 1-Click Fast Admin Demo Login -->
-      <div class="guard-quick-login-box">
+      <div class="guard-quick-login-box" hidden style="display: none;">
         <h5>⚡ Thử nghiệm nhanh (Dành cho Giám khảo / Test):</h5>
         <button type="button" class="btn btn-primary" id="btnQuickAdminLogin" style="width: 100%; padding: 10px; font-size: 0.85rem; background: linear-gradient(135deg, #0284c7, #2563eb);">
           🔑 Đăng nhập ngay với quyền Admin mẫu
@@ -172,7 +166,7 @@
                 <polyline points="1 20 1 14 7 14"></polyline>
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
               </svg>
-              <span>Đồng Bộ Cloud</span>
+              <span id="userCloudButtonLabel">Làm mới dữ liệu Cloud</span>
             </button>
             <button type="button" class="btn btn-outline-light" id="btnExportUsersCSV" style="color: #0f172a; border-color: #cbd5e1; background: #ffffff;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -180,14 +174,14 @@
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              <span>Xuất File CSV</span>
+              <span>Xuất CSV từ Cloud</span>
             </button>
             <button type="button" class="btn btn-primary" id="btnOpenAddUserModal">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>Thêm Người Dùng Mới</span>
+              <span>Thêm Hồ Sơ</span>
             </button>
           </div>
         </div>
@@ -196,7 +190,7 @@
         <div class="admin-stats-grid">
           <div class="stat-card">
             <div class="stat-content">
-              <span>Tổng Người Dùng</span>
+              <span>Người dùng đã tải</span>
               <h3 id="statTotalUsers">0</h3>
             </div>
             <div class="stat-icon blue">
@@ -252,7 +246,7 @@
         <div class="admin-card">
           <div class="admin-card-header">
             <div class="admin-card-title">
-              <span>Danh Sách Tài Khoản Hệ Thống</span>
+              <span>Danh Sách Tài Khoản Đã Tải</span>
               <span id="userCountBadge" class="badge-count" style="display: inline-block;">0</span>
             </div>
 
@@ -282,6 +276,7 @@
             </div>
           </div>
 
+          <p id="userCloudStatus" class="cloud-page-status" role="status">Đang tải dữ liệu từ Cloud.</p>
           <!-- Data Table -->
           <div class="admin-table-responsive">
             <table class="admin-table">
@@ -300,6 +295,11 @@
               </tbody>
             </table>
           </div>
+          <nav id="userPagination" class="admin-pagination" aria-label="Phân trang người dùng">
+            <button type="button" data-page="previous">Trước</button>
+            <span data-page="status" aria-live="polite"></span>
+            <button type="button" data-page="next">Sau</button>
+          </nav>
         </div>
       </section>
 
@@ -319,7 +319,7 @@
                 <polyline points="1 20 1 14 7 14"></polyline>
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
               </svg>
-              <span>Đồng Bộ Lịch Hẹn</span>
+              <span id="bookingCloudButtonLabel">Tải thêm từ Cloud</span>
             </button>
           </div>
         </div>
@@ -344,6 +344,7 @@
             </div>
           </div>
 
+          <p id="bookingCloudStatus" class="cloud-page-status" role="status">Bộ lọc chỉ áp dụng cho dữ liệu đã tải hoặc lưu trên trình duyệt.</p>
           <div class="admin-table-responsive">
             <table class="admin-table">
               <thead>
@@ -361,6 +362,11 @@
               </tbody>
             </table>
           </div>
+          <nav id="bookingPagination" class="admin-pagination" aria-label="Phân trang lịch hẹn và yêu cầu">
+            <button type="button" data-page="previous">Trước</button>
+            <span data-page="status" aria-live="polite"></span>
+            <button type="button" data-page="next">Sau</button>
+          </nav>
         </div>
       </section>
 
@@ -530,7 +536,8 @@
             </div>
           </div>
 
-          <div class="form-group" id="groupUserPassword">
+          <p id="accountManagementHint">Thao tác này chỉ quản lý hồ sơ; không tạo, khóa hoặc xóa tài khoản đăng nhập.</p>
+          <div class="form-group" id="groupUserPassword" hidden>
             <label class="form-label" id="lblUserPassword">Mật khẩu tài khoản *</label>
             <div class="input-with-icon" style="position: relative;">
               <span class="input-icon-left">

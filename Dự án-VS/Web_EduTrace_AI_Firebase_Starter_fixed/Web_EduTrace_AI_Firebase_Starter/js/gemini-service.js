@@ -22,6 +22,7 @@ class EduTraceGeminiService {
    * Lấy API Key hiện tại từ localStorage
    */
   getApiKey() {
+    if (window.edutraceGeminiCloud) return '';
     return (localStorage.getItem(this.STORAGE_KEY_API) || '').trim();
   }
 
@@ -29,6 +30,7 @@ class EduTraceGeminiService {
    * Lưu API Key mới
    */
   setApiKey(key) {
+    if (window.edutraceGeminiCloud) throw new Error('Khóa Gemini được quản lý trên máy chủ.');
     const cleaned = (key || '').trim();
     if (cleaned) {
       localStorage.setItem(this.STORAGE_KEY_API, cleaned);
@@ -43,6 +45,7 @@ class EduTraceGeminiService {
    * Lấy model hiện đang cấu hình
    */
   getModel() {
+    if (window.edutraceGeminiCloud) return 'gemini-3.8-flash';
     return localStorage.getItem(this.STORAGE_KEY_MODEL) || this.DEFAULT_MODEL;
   }
 
@@ -61,6 +64,7 @@ class EduTraceGeminiService {
    * Kiểm tra hệ thống đã có API Key chưa
    */
   isConfigured() {
+    if (window.edutraceGeminiCloud) return window.edutraceGeminiCloud.available;
     return Boolean(this.getApiKey());
   }
 
@@ -84,6 +88,13 @@ class EduTraceGeminiService {
    * @returns {Promise<{success: boolean, latencyMs?: number, message?: string, error?: string}>}
    */
   async testConnection(testKey = null, testModel = null) {
+    if (window.edutraceGeminiCloud) {
+      const start = performance.now();
+      try {
+        const message = await window.edutraceGeminiCloud.generate([{ role: 'user', text: 'Xin chào' }]);
+        return { success: true, latencyMs: Math.round(performance.now() - start), message };
+      } catch (error) { return { success: false, error: error.message }; }
+    }
     const key = (testKey !== null ? testKey : this.getApiKey()).trim();
     const model = testModel || this.getModel();
 
@@ -152,6 +163,15 @@ class EduTraceGeminiService {
    * @returns {Promise<Object>} Dữ liệu phân tích cấu trúc { ageGroup, extractedKeywords, advice, recommendedExerciseIds }
    */
   async analyzeAssessment(userInput) {
+    if (window.edutraceGeminiCloud) {
+      const raw = await window.edutraceGeminiCloud.generate([{ role: 'user', text: userInput }], 'assessment');
+      const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const result = JSON.parse(cleaned);
+      if (typeof result.advice !== 'string' || !Array.isArray(result.extractedKeywords) ||
+          !result.extractedKeywords.every(item => item && typeof item.text === 'string') ||
+          !Array.isArray(result.recommendedExerciseIds)) throw new Error('Phản hồi AI không đúng định dạng.');
+      return result;
+    }
     const key = this.getApiKey();
     if (!key) {
       throw new Error('MISSING_API_KEY');
@@ -216,6 +236,11 @@ class EduTraceGeminiService {
    * @returns {Promise<string>} Câu trả lời từ Gemini
    */
   async sendChatMessage(userMessage, history = []) {
+    if (window.edutraceGeminiCloud) {
+      const messages = history.slice(-19).map(item => ({ role: item.role === 'user' ? 'user' : 'model', text: String(item.text || item.content || '') }));
+      messages.push({ role: 'user', text: userMessage });
+      return window.edutraceGeminiCloud.generate(messages);
+    }
     const key = this.getApiKey();
     if (!key) {
       throw new Error('MISSING_API_KEY');
