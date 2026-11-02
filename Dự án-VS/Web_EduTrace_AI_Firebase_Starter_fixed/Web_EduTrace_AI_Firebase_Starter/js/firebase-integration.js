@@ -6,6 +6,9 @@ import {
   getFirestore,
   addDoc,
   collection,
+  query,
+  where,
+  onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig, firebaseConfigured } from "./firebase-config.js";
@@ -13,12 +16,27 @@ import { getCurrentUser, recordUserActivity } from "./firebase-auth.js";
 import "./auth-ui.js";
 import "./gemini-cloud-client.js";
 import "./clinical-workspace.js";
+import "./center-workspace.js";
 import "./investor-workspace.js";
 import "./knowledge-cloud.js";
 
 if (firebaseConfigured) {
   const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const centerSelect = document.getElementById('bookingCenterSelect');
+  const directoryStatus = document.getElementById('bookingDirectoryStatus');
+  if (centerSelect) {
+    onSnapshot(query(collection(db, 'centerDirectory'), where('active', '==', true)), snapshot => {
+      const previous = centerSelect.value;
+      centerSelect.replaceChildren(new Option('Chọn trung tâm đã liên kết', ''));
+      snapshot.docs.sort((a,b) => String(a.data().name).localeCompare(String(b.data().name), 'vi')).forEach(item => {
+        const name = item.data().name;
+        if (typeof name === 'string' && name.trim()) centerSelect.add(new Option(name, item.id));
+      });
+      if ([...centerSelect.options].some(option => option.value === previous)) centerSelect.value = previous;
+      directoryStatus.textContent = snapshot.empty ? 'Chưa có trung tâm được liên kết. Vui lòng liên hệ quản trị viên.' : 'Chọn đúng trung tâm tiếp nhận yêu cầu.';
+    }, () => { centerSelect.replaceChildren(new Option('Không tải được danh sách trung tâm', '')); directoryStatus.textContent = 'Không tải được danh sách trung tâm. Vui lòng thử lại.'; });
+  }
 
   function formValue(form, name) {
     return String(new FormData(form).get(name) || "").trim();
@@ -121,10 +139,13 @@ if (firebaseConfigured) {
       event.preventDefault();
       event.stopImmediatePropagation();
 
+      const selectedCenter = centerSelect?.selectedOptions[0];
+      if (!selectedCenter?.value) { showSafeToast('Vui lòng chọn trung tâm đã liên kết.'); return; }
       const payload = {
         parentName: formValue(form, "parentName"),
         parentPhone: formValue(form, "parentPhone"),
-        targetCenter: formValue(form, "targetCenter"),
+        targetCenter: selectedCenter.textContent,
+        centerUid: selectedCenter.value,
         preferredSchedule: formValue(form, "preferredSchedule"),
         status: "pending"
       };

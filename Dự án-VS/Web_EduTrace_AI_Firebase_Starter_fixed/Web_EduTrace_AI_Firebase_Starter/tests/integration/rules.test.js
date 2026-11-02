@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp, writeBatch, collection, query, where, limit } from 'firebase/firestore';
 
 test('Rules dự thảo: khách, chủ tài khoản và admin có quyền khác nhau', async () => {
   if (!process.env.FIRESTORE_EMULATOR_HOST) throw new Error('Chỉ chạy trên Firestore Emulator.');
@@ -78,5 +78,31 @@ test('Rules dự thảo: khách, chủ tài khoản và admin có quyền khác 
     await assertSucceeds(getDoc(doc(guest,'knowledge/k1')));
     await assertFails(setDoc(doc(admin,'knowledge/k2'),{...knowledge,file:{name:'Bad',url:'javascript:alert(1)',description:''}}));
     await assertFails(setDoc(doc(admin,'knowledge/k3'),{...knowledge,content:'x'.repeat(20001)}));
+    const center = env.authenticatedContext('center1', { center: true }).firestore();
+    const anotherCenter = env.authenticatedContext('center2', { center: true }).firestore();
+    const centerProfile = {name:'Trung tâm kiểm thử', address:'', phone:'', description:'', updatedAt:serverTimestamp()};
+    const centerItem = {code:'TEST-01',details:'Ca sáng',status:'active',updatedAt:serverTimestamp()};
+    await assertFails(setDoc(doc(owner,'centerWorkspaces/owner'),centerProfile));
+    await assertSucceeds(setDoc(doc(center,'centerWorkspaces/center1'),centerProfile));
+    await assertFails(getDoc(doc(anotherCenter,'centerWorkspaces/center1')));
+    await assertSucceeds(setDoc(doc(center,'centerWorkspaces/center1/appointments/a'),centerItem));
+    await assertSucceeds(setDoc(doc(center,'centerWorkspaces/center1/students/s'),centerItem));
+    await assertFails(getDoc(doc(anotherCenter,'centerWorkspaces/center1/students/s')));
+    await assertFails(setDoc(doc(center,'centerWorkspaces/center1/students/bad'),{...centerItem,status:'other'}));
+    await assertFails(setDoc(doc(center,'centerWorkspaces/center1/other/x'),centerItem));
+    await assertFails(setDoc(doc(center,'centerDirectory/center1'),{name:'Trung tâm A',active:true}));
+    await assertSucceeds(setDoc(doc(admin,'centerDirectory/center1'),{name:'Trung tâm A',active:true}));
+    await assertSucceeds(getDocs(query(collection(guest,'centerDirectory'),where('active','==',true))));
+    const routed = {...booking,targetCenter:'Trung tâm A',centerUid:'center1'};
+    await assertSucceeds(setDoc(doc(guest,'bookingRequests/routed'),routed));
+    await assertFails(setDoc(doc(guest,'bookingRequests/wrong'),{...routed,targetCenter:'Tên sai'}));
+    await assertFails(setDoc(doc(guest,'bookingRequests/missing'),{...routed,centerUid:'unknown'}));
+    await assertSucceeds(getDoc(doc(center,'bookingRequests/routed')));
+    await assertSucceeds(getDocs(query(collection(center,'bookingRequests'),where('centerUid','==','center1'),limit(50))));
+    await assertFails(getDoc(doc(anotherCenter,'bookingRequests/routed')));
+    await assertFails(getDoc(doc(center,'bookingRequests/test')));
+    await assertSucceeds(updateDoc(doc(center,'bookingRequests/routed'),{status:'contacted'}));
+    await assertFails(updateDoc(doc(center,'bookingRequests/routed'),{parentPhone:'0999999999'}));
+    await assertFails(updateDoc(doc(anotherCenter,'bookingRequests/routed'),{status:'confirmed'}));
   } finally { await env.cleanup(); }
 });

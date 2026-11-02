@@ -1,5 +1,9 @@
 # EduTrace AI — chạy và cấu hình
 
+## Liên kết trung tâm nhận lịch hẹn
+
+Yêu cầu đặt lịch mới chọn từ danh sách `centerDirectory` do admin kiểm soát. Chỉ sau khi xác minh đúng UID đại diện trung tâm, cấp quyền `center` bằng `node scripts/grant-center.js edutrace-ai <UID>`, rồi tạo mục bằng `node scripts/link-center-directory.js edutrace-ai <UID> "Tên trung tâm đã xác minh"`. Hai lệnh thay đổi quyền và dữ liệu Firebase thật; không chạy với UID chưa xác minh. Người dùng cần đăng nhập lại để nhận quyền. Script liên kết không ghi đè mục đã tồn tại. Nếu chưa có trung tâm đã liên kết, biểu mẫu mới không thể gửi. Những yêu cầu cũ không có `centerUid` vẫn chỉ hiện ở admin, không tự gán bằng tên. Danh sách trung tâm tải từng lô tối đa 50 yêu cầu; làm mới để xem các thay đổi mới.
+
 ## Lưu PDF tri thức (chuẩn bị, chưa kích hoạt)
 
 Cloud Storage for Firebase yêu cầu gói Blaze; chưa nâng gói hoặc tạo bucket trong thay đổi này. Khi người vận hành đã chọn gói và tạo bucket, cấu hình tên bucket trong `knowledgeStorageBucket` ở `js/firebase-config.js`, triển khai riêng `storage.rules`, rồi kiểm thử tải và đọc PDF trên dự án thật bằng tài khoản thử nghiệm trước khi đưa giao diện vào sử dụng. Quy tắc hiện cho phép mọi người đọc PDF qua Storage; chỉ dùng cho tài liệu được phép công khai, không dùng cho dữ liệu trẻ em hoặc hồ sơ cá nhân. Hệ thống giới hạn PDF 8 MB, không cho ghi đè; xóa tri thức không tự xóa PDF trong bucket. Cần có quy trình thu dọn tệp không còn tham chiếu và sao lưu riêng. Khi chưa cấu hình bucket, tính năng tải PDF bị tắt và có thể dùng liên kết HTTPS sẵn có.

@@ -257,11 +257,31 @@
         </div>
       </section>
       <div class="role-workspace-cards" id="investorWorkspace" hidden>
+        <a class="role-workspace-card" href="#centerPanel"><span class="role-card-icon">✚</span><strong>Quản lý trung tâm</strong><span>Hồ sơ, lịch hẹn và danh sách học viên theo mã.</span><span class="role-card-link">Mở khu vực quản lý →</span></a>
         <a class="role-workspace-card" href="#investorReportPanel"><span class="role-card-icon">▤</span><strong>Báo cáo tổng hợp</strong><span>Xem số liệu đã được quản trị viên công bố.</span><span class="role-card-link">Xem báo cáo →</span></a>
         <a class="role-workspace-card" href="#overview-process"><span class="role-card-icon">◈</span><strong>Mô hình hoạt động</strong><span>Tìm hiểu cách EduTrace kết nối phụ huynh và trung tâm.</span><span class="role-card-link">Xem quy trình →</span></a>
         <a class="role-workspace-card" href="#pricing"><span class="role-card-icon">◫</span><strong>Sản phẩm và dịch vụ</strong><span>Khám phá các gói dịch vụ đang giới thiệu.</span><span class="role-card-link">Xem dịch vụ →</span></a>
         <a class="role-workspace-card" href="#contact"><span class="role-card-icon">✉</span><strong>Liên hệ đầu tư</strong><span>Để lại thông tin để trao đổi cùng đội ngũ dự án.</span><span class="role-card-link">Gửi yêu cầu →</span></a>
       </div>
+      <section id="centerPanel" class="clinical-panel" hidden aria-labelledby="centerTitle">
+        <h3 id="centerTitle">Quản lý trung tâm</h3><p id="centerStatus" role="status">Đang kiểm tra quyền...</p>
+        <div id="centerContent" hidden>
+          <p>Chỉ lưu mã học viên; không nhập tên trẻ hoặc thông tin sức khỏe. Yêu cầu mới được gửi đến trung tâm đã được admin liên kết; lịch hẹn tự nhập được lưu riêng.</p>
+          <h4>Hồ sơ cơ sở</h4>
+          <form id="centerProfileForm">
+            <label>Tên cơ sở <input name="name" class="form-control" maxlength="120" required></label>
+            <label>Địa chỉ <input name="address" class="form-control" maxlength="250"></label>
+            <label>Số điện thoại <input name="phone" class="form-control" maxlength="20"></label>
+            <label>Giới thiệu <textarea name="description" class="form-control" maxlength="1000"></textarea></label>
+            <button class="role-workspace-profile" type="submit">Lưu hồ sơ cơ sở</button>
+          </form>
+          <h4>Yêu cầu đặt lịch từ trang chủ</h4><p id="centerIncomingStatus" role="status">Đang tải...</p><button type="button" id="centerIncomingRefresh">Làm mới yêu cầu</button><div id="centerIncomingList"></div><button type="button" id="centerIncomingMore" hidden>Tải thêm yêu cầu</button>
+          <h4>Lịch hẹn trung tâm tự nhập</h4><div id="centerAppointmentCount"></div>
+          <form id="centerAppointmentForm"><label>Mã lịch hẹn <input name="code" class="form-control" maxlength="100" required></label><label>Thời gian / ghi chú không định danh <input name="details" class="form-control" maxlength="500"></label><label>Trạng thái <select name="status" class="form-control"><option value="active">Đang theo dõi</option><option value="completed">Hoàn thành</option></select></label><button class="role-workspace-profile" type="submit">Lưu lịch hẹn</button><button type="button" id="centerAppointmentReset">Tạo mới</button></form><div id="centerAppointmentList"></div>
+          <h4>Danh sách học viên theo mã</h4><div id="centerStudentCount"></div>
+          <form id="centerStudentForm"><label>Mã học viên <input name="code" class="form-control" maxlength="100" required></label><label>Ghi chú không định danh <input name="details" class="form-control" maxlength="500"></label><label>Trạng thái <select name="status" class="form-control"><option value="active">Đang theo dõi</option><option value="completed">Hoàn thành</option></select></label><button class="role-workspace-profile" type="submit">Lưu học viên</button><button type="button" id="centerStudentReset">Tạo mới</button></form><div id="centerStudentList"></div>
+        </div>
+      </section>
       <section id="investorReportPanel" class="clinical-panel" hidden aria-labelledby="investorReportTitle">
         <h3 id="investorReportTitle">Báo cáo dành cho nhà đầu tư</h3>
         <p id="investorReportStatus" role="status">Đang kiểm tra quyền...</p>
@@ -1836,9 +1856,8 @@
                 <label class="form-label">Bạn là ai? *</label>
                 <select name="role" class="form-control" required>
                   <option value="parent">Phụ huynh có con cần can thiệp (1.5 – 10 tuổi)</option>
-                  <option value="center">Đại diện Trung tâm can thiệp / Trường Mầm non (Đăng ký B2B)</option>
+                  <option value="center">Trung tâm / Đối tác</option>
                   <option value="doctor">Bác sĩ Nhi khoa / Chuyên gia Tâm lý cố vấn</option>
-                  <option value="investor">Nhà đầu tư / Đối tác hỗ trợ dự án</option>
                 </select>
               </div>
             </div>
@@ -1961,7 +1980,7 @@
       <div style="padding: 24px;">
         <div
           style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-          <span style="font-size: 0.78rem; color: #1e40af; font-weight: 700;">TRUNG TÂM ĐỐI TÁC TIẾP NHẬN:</span>
+          <span style="font-size: 0.78rem; color: #1e40af; font-weight: 700;">TRUNG TÂM ĐANG XEM (HÃY XÁC NHẬN TRONG DANH SÁCH BÊN DƯỚI):</span>
           <h4 style="font-size: 1.05rem; color: #1e3a8a; margin: 4px 0;" id="bookingCenterDisplay">Trung tâm Ánh Sao
             Ninh Kiều</h4>
           <p style="font-size: 0.8rem; color: #64748b;" id="bookingAddressDisplay">Quận Ninh Kiều, TP. Cần Thơ</p>
@@ -1969,6 +1988,7 @@
 
         <form id="centerBookingForm">
           <input type="hidden" name="targetCenter" id="bookingTargetCenter" value="">
+          <div class="form-group"><label for="bookingCenterSelect" class="form-label">Chọn trung tâm đã liên kết *</label><select id="bookingCenterSelect" name="centerUid" class="form-control" required><option value="">Đang tải danh sách...</option></select><p id="bookingDirectoryStatus" role="status">Đang tải danh sách trung tâm.</p></div>
 
           <div class="form-row">
             <div class="form-group">
@@ -1983,10 +2003,6 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Tên và độ tuổi của bé *</label>
-              <input type="text" name="childInfo" class="form-control" placeholder="Ví dụ: Bé Bo, 2.5 tuổi" required>
-            </div>
-            <div class="form-group">
               <label class="form-label">Thời gian mong muốn khám thử *</label>
               <select name="preferredSchedule" class="form-control" required>
                 <option value="weekend">Thứ 7 hoặc Chủ Nhật tuần này</option>
@@ -1996,11 +2012,6 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Mô tả phản hồi của bé sau khi tập bài tập tại nhà</label>
-            <textarea name="trialFeedback" class="form-control" rows="3"
-              placeholder="Ví dụ: Bé đã chịu nhìn vào mắt mẹ khi chơi ú òa, nhưng vẫn chưa bật âm rõ..."></textarea>
-          </div>
 
           <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
             Xác Nhận Đặt Lịch Hẹn Tại Trung Tâm
@@ -2169,9 +2180,8 @@
                 <label class="form-label">Bạn là ai? *</label>
                 <select id="regRole" class="form-control" required>
                   <option value="parent">Phụ huynh (Có con cần can thiệp)</option>
-                  <option value="center">Trung tâm / Cơ sở can thiệp sớm</option>
+                  <option value="center">Trung tâm / Đối tác</option>
                   <option value="doctor">Chuyên viên / Bác sĩ can thiệp</option>
-                  <option value="investor">Nhà đầu tư / Đối tác đề án</option>
                 </select>
               </div>
             </div>
@@ -2377,9 +2387,8 @@
               <label class="form-label">Vai trò trên nền tảng</label>
               <select id="profileEditRole" class="form-control">
                 <option value="parent">Phụ huynh có con cần can thiệp</option>
-                <option value="center">Trung tâm can thiệp sớm / Cơ sở giáo dục</option>
+                <option value="center">Trung tâm / Đối tác</option>
                 <option value="doctor">Chuyên viên / Bác sĩ can thiệp</option>
-                <option value="investor">Nhà đầu tư / Đối tác đề án</option>
               </select>
             </div>
           </div>

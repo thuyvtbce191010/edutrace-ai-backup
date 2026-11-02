@@ -14,7 +14,9 @@ test('không gian hiển thị đúng vai trò và ẩn khi đăng xuất', () =
   updateRoleWorkspace({ role: 'investor', displayName: 'Đối tác B' }, root);
   assert.equal(elements.doctorWorkspace.hidden, true);
   assert.equal(elements.investorWorkspace.hidden, false);
-  assert.equal(elements.roleWorkspaceTitle.textContent, 'Không gian đối tác');
+  assert.equal(elements.roleWorkspaceTitle.textContent, 'Không gian trung tâm');
+  updateRoleWorkspace({ role: 'center' }, root);
+  assert.equal(elements.investorWorkspace.hidden, false);
   updateRoleWorkspace(null, root);
   assert.equal(elements.roleWorkspace.hidden, true);
   updateRoleWorkspace({ role: 'parent' }, root);

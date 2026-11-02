@@ -105,7 +105,7 @@ export const DEMO_PRESET_ACCOUNTS = {
 
 export const ROLE_LABELS = {
   parent: "Phụ huynh",
-  center: "Trung tâm",
+  center: "Trung tâm / Đối tác",
   doctor: "Chuyên viên / Bác sĩ",
   investor: "Nhà đầu tư / Đối tác",
   admin: "Quản Trị Viên (Admin)"
