@@ -131,6 +131,7 @@
           </svg>
           <span>Thông Tin Hệ Thống</span>
         </li>
+        <li class="admin-nav-item" data-tab="tabInvestor"><span>📊 Báo cáo nhà đầu tư</span></li>
         <li class="admin-nav-item" data-tab="tabAIKnowledge">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
@@ -414,11 +415,27 @@
       <!-- ==========================================
            TAB 4: QUẢN TRỊ TRI THỨC AI & GEMINI HUB
            ========================================== -->
+      <section id="panelTabInvestor" class="admin-tab-panel" style="display: none;">
+        <div class="admin-page-header"><div class="admin-page-title"><h1>Báo cáo nhà đầu tư</h1><p>Công bố số liệu tổng hợp đã được kiểm chứng cho đối tác được cấp quyền.</p></div></div>
+        <div class="admin-card" style="padding:28px;max-width:760px">
+          <p id="investorAdminStatus" role="status">Đang kiểm tra báo cáo...</p>
+          <form id="investorReportForm" style="display:grid;gap:14px;margin-top:16px">
+            <label>Tiêu đề <input class="form-control" name="title" required maxlength="120"></label>
+            <label>Kỳ báo cáo <input class="form-control" name="period" required maxlength="100" placeholder="Ví dụ: Quý 3/2026"></label>
+            <label>Tóm tắt và nguồn số liệu <textarea class="form-control" name="summary" maxlength="2000" rows="4"></textarea></label>
+            <label>Người dùng <input class="form-control" type="number" name="users" required min="0" max="1000000000" step="1"></label>
+            <label>Đối tác <input class="form-control" type="number" name="partners" required min="0" max="1000000000" step="1"></label>
+            <label>Yêu cầu <input class="form-control" type="number" name="requests" required min="0" max="1000000000" step="1"></label>
+            <button class="btn btn-primary" type="submit">Công bố báo cáo</button>
+          </form>
+        </div>
+      </section>
       <section id="panelTabAIKnowledge" class="admin-tab-panel" style="display: none;">
         <div class="admin-page-header">
           <div class="admin-page-title">
             <h1>Quản Trị Cơ Sở Tri Thức AI &amp; Gemini Engine</h1>
             <p>Quản lý phác đồ y khoa, bài tập chuẩn hóa và thêm tri thức lâm sàng tùy biến cho Trợ lý AI</p>
+            <p id="knowledgeCloudStatus" role="status">Đang kết nối kho tri thức Firebase. Chỉ lưu nội dung và liên kết HTTPS; tệp tải trực tiếp chưa được hỗ trợ.</p>
           </div>
           <div style="display: flex; gap: 10px;">
             <button type="button" class="btn btn-primary" id="btnAdminOpenAddKnowledge">
@@ -637,6 +654,22 @@
             <label class="form-label">Nội dung tri thức chi tiết (Prompt Context để Gemini học) *</label>
             <textarea id="knContent" class="form-control" rows="4" placeholder="Nhập chi tiết hướng dẫn, biểu hiện, phương pháp can thiệp từng bước để Gemini AI học và tư vấn cho phụ huynh..." required></textarea>
           </div>
+          <div class="kn-media-section">
+            <strong>Trích xuất nội dung bằng Gemini</strong>
+            <p>Chọn PDF tối đa 8 MB hoặc nhập link YouTube công khai ở mục video bên dưới. Nội dung được gửi tới Google để xử lý; kiểm tra bản nháp trước khi đưa vào tri thức.</p>
+            <label for="knExtractPdf">PDF dùng để trích xuất</label>
+            <input type="file" id="knExtractPdf" accept="application/pdf,.pdf" class="form-control">
+            <label><input type="checkbox" id="knStoreExtractPdf" disabled> Lưu PDF gốc cùng tri thức trên Firebase Storage</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+              <button type="button" class="btn btn-outline-light" id="btnExtractPdf">Đọc PDF</button>
+              <button type="button" class="btn btn-outline-light" id="btnExtractYoutube">Đọc video YouTube</button>
+            </div>
+            <p id="knExtractStatus" role="status">Chưa trích xuất.</p>
+            <label for="knExtractDraft">Bản nháp cần kiểm tra</label>
+            <textarea id="knExtractDraft" class="form-control" rows="6" maxlength="20000" placeholder="Kết quả trích xuất sẽ hiển thị tại đây để bạn kiểm tra và chỉnh sửa."></textarea>
+            <button type="button" class="btn btn-outline-light" id="btnUseExtractDraft" style="margin-top:10px">Thêm bản nháp vào nội dung tri thức</button>
+            <p id="knPdfStorageStatus">Kho Firebase Storage chưa được cấu hình; có thể thêm liên kết HTTPS tới PDF ở phần tài liệu bên dưới.</p>
+          </div>
 
           <!-- ================================================================
                MỤC 1: TẢI FILE TÀI LIỆU CHO AI GỢI Ý (PDF, DOCX, TXT, HÌNH ẢNH)
@@ -664,7 +697,7 @@
                 <div class="kn-dropzone-text">
                   <strong>Bấm để chọn file</strong> hoặc kéo thả file vào đây
                 </div>
-                <div class="kn-dropzone-hint">Hỗ trợ PDF, Word (.docx), TXT, Ảnh PNG/JPG (tối đa 25MB)</div>
+                <div class="kn-dropzone-hint">Lưu cloud: PDF tối đa 8 MB, cần cấu hình Firebase Storage.</div>
               </div>
 
               <!-- File Preview Card (Ẩn mặc định, hiện khi đã chọn file) -->

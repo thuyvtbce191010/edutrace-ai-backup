@@ -356,6 +356,9 @@ class EduTraceChatbotUI {
       if (err.message === 'MISSING_API_KEY') {
         errorMsg = 'Ba mẹ chưa thiết lập Gemini API Key. Vui lòng bấm vào biểu tượng bánh răng ở góc trên để nhập key miễn phí từ Google AI Studio!';
       }
+      if (err.message === 'KNOWLEDGE_UNAVAILABLE') {
+        errorMsg = 'Chưa tải được tri thức mới từ Firebase. Vui lòng kiểm tra kết nối và thử lại; câu trả lời bên dưới chỉ dùng dữ liệu cục bộ.';
+      }
       this.appendMessage('bot', errorMsg);
 
       // Thử trả lời bằng Doctor Rules

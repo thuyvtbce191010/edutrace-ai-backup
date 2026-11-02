@@ -1,5 +1,9 @@
 # EduTrace AI — chạy và cấu hình
 
+## Lưu PDF tri thức (chuẩn bị, chưa kích hoạt)
+
+Cloud Storage for Firebase yêu cầu gói Blaze; chưa nâng gói hoặc tạo bucket trong thay đổi này. Khi người vận hành đã chọn gói và tạo bucket, cấu hình tên bucket trong `knowledgeStorageBucket` ở `js/firebase-config.js`, triển khai riêng `storage.rules`, rồi kiểm thử tải và đọc PDF trên dự án thật bằng tài khoản thử nghiệm trước khi đưa giao diện vào sử dụng. Quy tắc hiện cho phép mọi người đọc PDF qua Storage; chỉ dùng cho tài liệu được phép công khai, không dùng cho dữ liệu trẻ em hoặc hồ sơ cá nhân. Hệ thống giới hạn PDF 8 MB, không cho ghi đè; xóa tri thức không tự xóa PDF trong bucket. Cần có quy trình thu dọn tệp không còn tham chiếu và sao lưu riêng. Khi chưa cấu hình bucket, tính năng tải PDF bị tắt và có thể dùng liên kết HTTPS sẵn có.
+
 Đây là ứng dụng HTML/CSS/JavaScript tĩnh, có tích hợp Firebase và chế độ demo. Chạy `Chay_EduTrace_AI.bat` hoặc phục vụ thư mục này bằng máy chủ HTTP; không mở trực tiếp bằng `file://`. Trang chính là `index.html`, trang quản trị là `admin.html`.
 
 ## Firebase

@@ -8,5 +8,6 @@
     ]
   },
   "firestore": { "rules": "firestore.rules" },
+  "storage": { "rules": "storage.rules" },
   "emulators": { "hosting": { "host": "127.0.0.1", "port": 15000 } }
 }

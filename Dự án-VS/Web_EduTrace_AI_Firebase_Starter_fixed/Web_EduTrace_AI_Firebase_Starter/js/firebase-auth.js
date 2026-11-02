@@ -194,7 +194,7 @@ export function formatAuthError(error) {
 }
 
 // Try saving profile to Firestore, silently handling permission restrictions
-async function saveUserProfileToFirestore(uid, profileData) {
+async function saveUserProfileToFirestore(uid, profileData, { required = false } = {}) {
   if (!db) return;
   try {
     await setDoc(doc(db, "users", uid), {
@@ -202,6 +202,7 @@ async function saveUserProfileToFirestore(uid, profileData) {
       updatedAt: serverTimestamp()
     }, { merge: true });
   } catch (err) {
+    if (required) throw err;
     // Firestore rules might restrict writes in demo mode - non-fatal
     console.info("Firestore profile sync skipped:", err.code || err.message);
   }
@@ -504,29 +505,26 @@ export async function resetPassword(email) {
 // UPDATE USER PROFILE
 export async function updateUserProfile({ displayName, phone, role }) {
   if (!currentAuthUser) throw new Error("Chưa đăng nhập.");
-
-  currentAuthUser.displayName = displayName || currentAuthUser.displayName;
-  if (phone !== undefined) currentAuthUser.phone = phone;
+  const nextUser = { ...currentAuthUser };
+  nextUser.displayName = displayName || nextUser.displayName;
+  if (phone !== undefined) nextUser.phone = phone;
   if (role) {
-    currentAuthUser.role = currentAuthUser.isAdmin ? "admin" : resolveRole(role);
-    currentAuthUser.roleLabel = ROLE_LABELS[currentAuthUser.role] || "Phụ huynh";
+    nextUser.role = nextUser.isAdmin ? "admin" : resolveRole(role);
+    nextUser.roleLabel = ROLE_LABELS[nextUser.role] || "Phụ huynh";
   }
-
-  saveLocalUser(currentAuthUser);
 
   if (auth && auth.currentUser && !currentAuthUser.isDemo) {
-    try {
-      await updateProfile(auth.currentUser, { displayName: currentAuthUser.displayName });
-      await saveUserProfileToFirestore(auth.currentUser.uid, {
-        displayName: currentAuthUser.displayName,
-        phone: currentAuthUser.phone,
-        role: currentAuthUser.role
-      });
-    } catch (e) {
-      console.warn("Profile cloud sync warning:", e);
-    }
+    await saveUserProfileToFirestore(auth.currentUser.uid, {
+      displayName: nextUser.displayName,
+      phone: nextUser.phone,
+      role: nextUser.role
+    }, { required: true });
+    try { await updateProfile(auth.currentUser, { displayName: nextUser.displayName }); }
+    catch (e) { console.warn("Firebase Auth display name update failed:", e.code || e.message); }
   }
 
+  currentAuthUser = nextUser;
+  saveLocalUser(currentAuthUser);
   notifySubscribers();
   return { success: true, user: currentAuthUser };
 }

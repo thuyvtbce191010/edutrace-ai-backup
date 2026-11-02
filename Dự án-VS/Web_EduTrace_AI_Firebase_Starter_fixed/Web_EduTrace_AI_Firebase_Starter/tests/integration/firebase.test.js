@@ -39,3 +39,29 @@ test('Rules cục bộ chặn khách đọc lịch hẹn', async () => {
     await assert.rejects(getDoc(doc(db, 'bookingRequests', 'booking-1')), { code: 'permission-denied' });
   } finally { await deleteApp(app); }
 });
+
+test('bác sĩ và nhà đầu tư đăng ký, đăng nhập và cập nhật hồ sơ', async () => {
+  if (!process.env.FIRESTORE_EMULATOR_HOST || !process.env.FIREBASE_AUTH_EMULATOR_HOST) throw new Error('Chỉ chạy trên Firebase Emulator.');
+  const app = initializeApp({ projectId: 'demo-edutrace', apiKey: 'demo-key' }, 'role-integration');
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  connectAuthEmulator(auth, `http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}`, { disableWarnings: true });
+  const [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(':');
+  connectFirestoreEmulator(db, host, Number(port));
+  try {
+    for (const role of ['doctor', 'investor']) {
+      const email = `${role}@example.invalid`;
+      const { user } = await createUserWithEmailAndPassword(auth, email, 'test-password');
+      const ref = doc(db, 'users', user.uid);
+      await setDoc(ref, { uid: user.uid, email, role, displayName: role });
+      await signOut(auth);
+      await signInWithEmailAndPassword(auth, email, 'test-password');
+      await updateDoc(ref, { displayName: `${role} updated` });
+      const profile = (await getDoc(ref)).data();
+      assert.equal(profile.role, role);
+      assert.equal(profile.displayName, `${role} updated`);
+      await assert.rejects(updateDoc(ref, { role: 'admin' }), { code: 'permission-denied' });
+      await signOut(auth);
+    }
+  } finally { await deleteApp(app); }
+});

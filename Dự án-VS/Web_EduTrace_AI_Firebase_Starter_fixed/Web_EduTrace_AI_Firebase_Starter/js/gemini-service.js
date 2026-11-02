@@ -178,6 +178,7 @@ class EduTraceGeminiService {
       throw new Error('MISSING_API_KEY');
     }
 
+    if (window.waitForEduTraceKnowledge) await window.waitForEduTraceKnowledge();
     const model = this.getModel();
     const systemPrompt = window.buildFullSystemPrompt ? window.buildFullSystemPrompt('assessment') : '';
     const endpoint = `${this.API_BASE}/${model}:generateContent?key=${encodeURIComponent(key)}`;
@@ -246,6 +247,7 @@ class EduTraceGeminiService {
       throw new Error('MISSING_API_KEY');
     }
 
+    if (window.waitForEduTraceKnowledge) await window.waitForEduTraceKnowledge();
     const model = this.getModel();
     const systemPrompt = window.buildFullSystemPrompt ? window.buildFullSystemPrompt('chat') : '';
     const endpoint = `${this.API_BASE}/${model}:generateContent?key=${encodeURIComponent(key)}`;

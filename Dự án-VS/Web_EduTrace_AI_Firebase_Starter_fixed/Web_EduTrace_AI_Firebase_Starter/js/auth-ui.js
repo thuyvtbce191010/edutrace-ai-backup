@@ -21,6 +21,7 @@ import {
   ROLE_LABELS
 } from "./firebase-auth.js";
 import { escapeHtml } from "./escape-html.js";
+import { updateRoleWorkspace } from "./role-workspace.js";
 
 function setAvatar(element, photoURL, displayName, initial) {
   if (!element) return;
@@ -403,6 +404,8 @@ export function setupAuthUI() {
 
   profileTabInfo?.addEventListener("click", () => openProfileModal("profile"));
   profileTabBookings?.addEventListener("click", () => openProfileModal("bookings"));
+  document.getElementById("roleWorkspaceProfile")?.addEventListener("click", () => openProfileModal("profile"));
+  document.getElementById("roleWorkspaceHistory")?.addEventListener("click", () => openProfileModal("bookings"));
 
   // Update Profile Form Submit
   formEditProfile?.addEventListener("submit", async (e) => {
@@ -434,6 +437,7 @@ export function setupAuthUI() {
   // Subscribe to Auth State Changes
   subscribeAuth((user) => {
     updateNavbarAuthState(user);
+    updateRoleWorkspace(user);
     populateFormsWithUserData(user);
     updateProfileModalData(user);
   });
@@ -566,9 +570,13 @@ function updateNavbarAuthState(user) {
   }
 }
 
+// Keep data from a previous signed-in user out of the next user's forms.
+let lastPrefilledUser = null;
 // Auto-fill forms across the website when logged in
 function populateFormsWithUserData(user) {
   if (!user) return;
+  const changedUser = lastPrefilledUser !== null && lastPrefilledUser !== user.email;
+  lastPrefilledUser = user.email;
 
   // 1. Consultation Form (B2C / B2B)
   const consultForm = document.getElementById("consultationForm");
@@ -578,9 +586,9 @@ function populateFormsWithUserData(user) {
     const emailInput = consultForm.querySelector('[name="email"]');
     const roleSelect = consultForm.querySelector('[name="role"]');
 
-    if (nameInput && !nameInput.value) nameInput.value = user.displayName;
-    if (phoneInput && !phoneInput.value && user.phone) phoneInput.value = user.phone;
-    if (emailInput && !emailInput.value) emailInput.value = user.email;
+    if (nameInput && (changedUser || !nameInput.value)) nameInput.value = user.displayName || "";
+    if (phoneInput && (changedUser || !phoneInput.value)) phoneInput.value = user.phone || "";
+    if (emailInput && (changedUser || !emailInput.value)) emailInput.value = user.email || "";
     if (roleSelect && user.role) {
       if (["parent", "center", "doctor", "investor"].includes(user.role)) {
         roleSelect.value = user.role;
@@ -594,8 +602,8 @@ function populateFormsWithUserData(user) {
     const parentName = bookingForm.querySelector('[name="parentName"]');
     const parentPhone = bookingForm.querySelector('[name="parentPhone"]');
 
-    if (parentName && !parentName.value) parentName.value = user.displayName;
-    if (parentPhone && !parentPhone.value && user.phone) parentPhone.value = user.phone;
+    if (parentName && (changedUser || !parentName.value)) parentName.value = user.displayName || "";
+    if (parentPhone && (changedUser || !parentPhone.value)) parentPhone.value = user.phone || "";
   }
 }
 
@@ -607,10 +615,12 @@ function updateProfileModalData(user) {
   const phoneInput = document.getElementById("profileEditPhone");
   const roleSelect = document.getElementById("profileEditRole");
   const avatarBig = document.getElementById("profileAvatarBig");
+  const profileHeroName = document.getElementById("profileHeroName");
   const createdAtSpan = document.getElementById("profileCreatedAt");
 
   const displayName = user.displayName || user.email.split("@")[0];
   const initial = displayName.charAt(0).toUpperCase();
+  if (profileHeroName) profileHeroName.textContent = displayName;
 
   if (nameInput) nameInput.value = displayName;
   if (emailInput) emailInput.value = user.email;

@@ -23,13 +23,86 @@ service cloud.firestore {
         && regularRole(request.resource.data.role));
       allow delete: if isAdmin();
     }
+    match /knowledge/{knowledgeId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['title', 'category', 'author', 'content', 'file', 'video', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['title', 'category', 'author', 'content', 'file', 'video', 'createdAt', 'updatedAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 200
+        && request.resource.data.category is string && request.resource.data.category.size() <= 120
+        && request.resource.data.author is string && request.resource.data.author.size() <= 200
+        && request.resource.data.content is string && request.resource.data.content.size() > 0 && request.resource.data.content.size() <= 20000
+        && request.resource.data.createdAt is timestamp && request.resource.data.updatedAt == request.time
+        && (request.resource.data.file == null || (request.resource.data.file is map && request.resource.data.file.keys().hasOnly(['name', 'url', 'description']) && request.resource.data.file.name is string && request.resource.data.file.name.size() <= 200 && request.resource.data.file.description is string && request.resource.data.file.description.size() <= 300 && request.resource.data.file.url is string && request.resource.data.file.url.size() <= 2000 && request.resource.data.file.url.matches('https://.*')))
+        && (request.resource.data.video == null || (request.resource.data.video is map && request.resource.data.video.keys().hasOnly(['title', 'url']) && request.resource.data.video.title is string && request.resource.data.video.title.size() <= 200 && request.resource.data.video.url is string && request.resource.data.video.url.size() <= 2000 && request.resource.data.video.url.matches('https://.*')));
+      allow delete: if isAdmin();
+    }
+    match /clinicalCases/{caseId} {
+      function doctor() { return request.auth != null && request.auth.token.get('clinician', false) == true; }
+      function owns() { return doctor() && resource.data.ownerUid == request.auth.uid; }
+      function valid() {
+        return request.resource.data.keys().hasAll(['ownerUid', 'code', 'assessment', 'exercise', 'progress', 'status', 'createdAt', 'updatedAt', 'lastHistoryId'])
+          && request.resource.data.keys().hasOnly(['ownerUid', 'code', 'assessment', 'exercise', 'progress', 'status', 'createdAt', 'updatedAt', 'lastHistoryId'])
+          && request.resource.data.ownerUid == request.auth.uid
+          && request.resource.data.code is string && request.resource.data.code.size() > 0 && request.resource.data.code.size() <= 80
+          && request.resource.data.assessment is string && request.resource.data.assessment.size() <= 2000
+          && request.resource.data.exercise is string && request.resource.data.exercise.size() <= 2000
+          && request.resource.data.progress is string && request.resource.data.progress.size() <= 2000
+          && request.resource.data.status in ['active', 'completed']
+          && request.resource.data.lastHistoryId is string && request.resource.data.lastHistoryId.matches('^[A-Za-z0-9_-]{1,100}$')
+          && request.resource.data.updatedAt == request.time;
+      }
+      function hasNewHistory() {
+        let historyPath = /databases/$(database)/documents/clinicalCases/$(caseId)/history/$(request.resource.data.lastHistoryId);
+        let history = getAfter(historyPath).data;
+        return !exists(historyPath) && history.createdAt == request.time
+          && history.code == request.resource.data.code && history.assessment == request.resource.data.assessment
+          && history.exercise == request.resource.data.exercise && history.progress == request.resource.data.progress
+          && history.status == request.resource.data.status;
+      }
+      allow create: if doctor() && valid() && request.resource.data.createdAt == request.time && hasNewHistory();
+      allow read: if owns();
+      allow update: if owns() && valid() && request.resource.data.createdAt == resource.data.createdAt && hasNewHistory();
+      allow delete: if false;
+      match /history/{entryId} {
+        function parent() { return getAfter(/databases/$(database)/documents/clinicalCases/$(caseId)).data; }
+        function ownsParent() { return request.auth != null && request.auth.token.get('clinician', false) == true && parent().ownerUid == request.auth.uid; }
+        allow read: if request.auth != null && request.auth.token.get('clinician', false) == true
+          && get(/databases/$(database)/documents/clinicalCases/$(caseId)).data.ownerUid == request.auth.uid;
+        allow create: if ownsParent()
+          && request.resource.data.keys().hasOnly(['code', 'assessment', 'exercise', 'progress', 'status', 'createdAt'])
+          && request.resource.data.keys().hasAll(['code', 'assessment', 'exercise', 'progress', 'status', 'createdAt'])
+          && request.resource.data.code == parent().code
+          && request.resource.data.assessment == parent().assessment
+          && request.resource.data.exercise == parent().exercise
+          && request.resource.data.progress == parent().progress
+          && request.resource.data.status == parent().status
+          && request.resource.data.createdAt == request.time && parent().updatedAt == request.time && parent().lastHistoryId == entryId;
+        allow update, delete: if false;
+      }
+    }
+    match /investorReports/{reportId} {
+      allow read: if isAdmin() || (request.auth != null && request.auth.token.get('investor', false) == true);
+      allow create, update: if isAdmin() && reportId == 'overview'
+        && request.resource.data.keys().hasOnly(['title', 'period', 'summary', 'users', 'partners', 'requests', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['title', 'period', 'summary', 'users', 'partners', 'requests', 'updatedAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 120
+        && request.resource.data.period is string && request.resource.data.period.size() > 0 && request.resource.data.period.size() <= 100
+        && request.resource.data.summary is string && request.resource.data.summary.size() <= 2000
+        && request.resource.data.users is int && request.resource.data.users >= 0 && request.resource.data.users <= 1000000000
+        && request.resource.data.partners is int && request.resource.data.partners >= 0 && request.resource.data.partners <= 1000000000
+        && request.resource.data.requests is int && request.resource.data.requests >= 0 && request.resource.data.requests <= 1000000000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
     match /leads/{id} {
       allow create: if request.resource.data.keys().hasAll(['name', 'phone', 'email', 'role', 'createdAt', 'source'])
-        && request.resource.data.keys().hasOnly(['name', 'phone', 'email', 'role', 'createdAt', 'source'])
+        && request.resource.data.keys().hasOnly(['name', 'phone', 'email', 'role', 'createdAt', 'source', 'notes'])
         && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100
         && request.resource.data.phone is string && request.resource.data.phone.size() >= 8 && request.resource.data.phone.size() <= 20
         && request.resource.data.email is string && request.resource.data.email.size() <= 254
         && regularRole(request.resource.data.role)
+        && (!('notes' in request.resource.data) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 2000))
         && request.resource.data.source == 'edutrace-ai-website' && request.resource.data.createdAt == request.time;
       allow read, update, delete: if isAdmin();
     }

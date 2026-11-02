@@ -28,3 +28,25 @@ test('kiểm tra kết nối nhận phản hồi thực sự', async () => {
   const { service } = await loadService('gemini-3.6-flash', { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: 'OK' }] } }] }) });
   assert.equal((await service.testConnection()).message, 'OK');
 });
+
+test('Gemini chờ tri thức cloud trước khi tạo prompt', async () => {
+  const source = await readFile(new URL('../js/gemini-service.js', import.meta.url), 'utf8');
+  let release; let ready = false; let sentBody;
+  const wait = new Promise(resolve => { release = () => { ready = true; resolve(); }; });
+  const window = { waitForEduTraceKnowledge: () => wait, buildFullSystemPrompt: () => ready ? 'Tri thức mới' : 'Chưa tải' };
+  vm.runInNewContext(source, { window, localStorage: { getItem: key => key === 'edutrace_gemini_api_key' ? 'fake-test-key' : null }, fetch: async (url, options) => { sentBody = JSON.parse(options.body); return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: 'OK' }] } }] }) }; } });
+  const request = window.geminiService.sendChatMessage('Xin chào');
+  assert.equal(sentBody, undefined);
+  release();
+  await request;
+  assert.equal(sentBody.systemInstruction.parts[0].text, 'Tri thức mới');
+});
+
+test('không gọi Gemini khi không tải được tri thức cloud', async () => {
+  const source = await readFile(new URL('../js/gemini-service.js', import.meta.url), 'utf8');
+  let called = false;
+  const window = { waitForEduTraceKnowledge: async () => { throw new Error('KNOWLEDGE_UNAVAILABLE'); } };
+  vm.runInNewContext(source, { window, localStorage: { getItem: () => 'fake-test-key' }, fetch: async () => { called = true; } });
+  await assert.rejects(window.geminiService.sendChatMessage('Xin chào'), /KNOWLEDGE_UNAVAILABLE/);
+  assert.equal(called, false);
+});

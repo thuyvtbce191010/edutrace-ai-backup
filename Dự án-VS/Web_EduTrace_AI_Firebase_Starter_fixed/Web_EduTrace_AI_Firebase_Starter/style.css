@@ -7929,3 +7929,38 @@ body.nav-menu-locked {
   border-color: #0d9488 !important;
   color: #ffffff !important;
 }
+
+/* Role workspaces */
+.role-workspace[hidden], .role-workspace-cards[hidden] { display: none !important; }
+.role-workspace { background: #f3f6fb; padding: 42px 24px 36px; color: #13213a; }
+.role-workspace-inner { max-width: 1200px; margin: 0 auto; }
+.role-workspace-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 30px 34px; background: #fff; border: 1px solid #e1e9f2; border-radius: 18px; box-shadow: 0 5px 18px rgba(26, 47, 79, .05); }
+.role-workspace-eyebrow { display: inline-block; color: #087d72; background: #e4f7f2; border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.role-workspace-heading h2 { margin: 12px 0 5px; font-size: clamp(24px, 3vw, 32px); color: #10203b; }
+.role-workspace-heading p { margin: 0; color: #64748b; line-height: 1.6; }
+.role-workspace-profile { flex-shrink: 0; border: 0; border-radius: 10px; padding: 13px 18px; background: #0d9488; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+.role-workspace-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.role-workspace-card { display: flex; flex-direction: column; align-items: flex-start; min-height: 210px; padding: 24px; border: 1px solid #e1e9f2; border-radius: 16px; background: #fff; text-decoration: none; color: #13213a; box-shadow: 0 5px 18px rgba(26, 47, 79, .04); transition: transform .18s, box-shadow .18s; }
+.role-workspace-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(26, 47, 79, .1); }
+.role-card-icon { display: grid; place-items: center; height: 42px; width: 42px; border-radius: 12px; background: #e7f5f3; color: #087d72; font-size: 21px; }
+.role-workspace-card strong { margin: 15px 0 7px; font-size: 16px; }
+.role-workspace-card > span:not(.role-card-icon):not(.role-card-link) { color: #64748b; font-size: 13px; line-height: 1.6; }
+.role-card-link { margin-top: auto; padding-top: 16px; color: #0d8077; font-size: 13px; font-weight: 700; }
+.role-workspace-footer { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-top: 18px; padding: 14px 4px; color: #64748b; font-size: 13px; }
+.role-workspace-footer button { background: none; border: 0; padding: 0; color: #087d72; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+@media (max-width: 720px) { .role-workspace { padding: 24px 16px; } .role-workspace-heading { align-items: flex-start; flex-direction: column; padding: 24px; } .role-workspace-cards { grid-template-columns: 1fr; } .role-workspace-card { min-height: 170px; } .role-workspace-footer { align-items: flex-start; flex-direction: column; } }
+.clinical-panel { margin: 22px 0; padding: 24px; background: #fff; border: 1px solid #e1e9f2; border-radius: 16px; }
+.clinical-panel[hidden], .clinical-panel [hidden] { display: none !important; }
+.clinical-panel h3 { color: #10203b; margin-bottom: 10px; }
+.clinical-panel p { color: #64748b; margin: 10px 0; }
+.clinical-panel form { display: grid; gap: 12px; margin: 18px 0; }
+.clinical-panel label { display: grid; gap: 5px; font-weight: 700; }
+.clinical-panel textarea { min-height: 75px; }
+.clinical-panel button { cursor: pointer; }
+.clinical-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px; border-bottom: 1px solid #e1e9f2; }
+#investorReportContent table { width: 100%; margin: 16px 0; border-collapse: collapse; }
+#investorReportContent th, #investorReportContent td { padding: 10px 12px; border-bottom: 1px solid #e1e9f2; text-align: left; }
+#investorReportContent th { color: #087d72; background: #f2faf8; }
+#investorReportSummary { white-space: pre-wrap; }
+.clinical-history-entry { margin: 12px 0; padding: 14px; border: 1px solid #e1e9f2; border-radius: 10px; background: #f8fafc; }
+.clinical-history-entry p { white-space: pre-wrap; overflow-wrap: anywhere; }

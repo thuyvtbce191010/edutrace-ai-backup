@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 
 test('Rules dự thảo: khách, chủ tài khoản và admin có quyền khác nhau', async () => {
   if (!process.env.FIRESTORE_EMULATOR_HOST) throw new Error('Chỉ chạy trên Firestore Emulator.');
   const [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(':');
   if (host !== '127.0.0.1' && host !== 'localhost') throw new Error('Chỉ được xóa dữ liệu trên emulator cục bộ.');
-  const env = await initializeTestEnvironment({ projectId: 'demo-edutrace', firestore: { host, port: Number(port), rules: await readFile('firestore.secure.rules', 'utf8') } });
+  const env = await initializeTestEnvironment({ projectId: 'demo-edutrace', firestore: { host, port: Number(port), rules: await readFile('firestore.rules', 'utf8') } });
   try {
     await env.clearFirestore();
     const guest = env.unauthenticatedContext().firestore();
@@ -23,6 +23,9 @@ test('Rules dự thảo: khách, chủ tài khoản và admin có quyền khác 
     await assertFails(updateDoc(doc(owner, 'users/owner'), { status: 'active' }));
     const lead = { name: 'Test', phone: '0901234567', email: 'test@example.test', role: 'parent', createdAt: serverTimestamp(), source: 'edutrace-ai-website' };
     await assertSucceeds(setDoc(doc(guest, 'leads/test'), lead));
+    await assertSucceeds(setDoc(doc(guest, 'leads/with-notes'), { ...lead, notes: 'Yêu cầu thử nghiệm' }));
+    await assertFails(setDoc(doc(guest, 'leads/long-notes'), { ...lead, notes: 'x'.repeat(2001) }));
+    await assertFails(setDoc(doc(guest, 'leads/bad-notes'), { ...lead, notes: 123 }));
     await assertFails(setDoc(doc(guest, 'leads/bad'), { ...lead, role: 'admin' }));
     await assertFails(getDoc(doc(guest, 'leads/test')));
     await assertSucceeds(getDoc(doc(admin, 'leads/test')));
@@ -32,5 +35,48 @@ test('Rules dự thảo: khách, chủ tài khoản và admin có quyền khác 
     await assertFails(getDoc(doc(guest, 'bookingRequests/test')));
     await assertFails(updateDoc(doc(owner, 'bookingRequests/test'), { status: 'confirmed' }));
     await assertSucceeds(updateDoc(doc(admin, 'bookingRequests/test'), { status: 'confirmed' }));
+    const clinician = env.authenticatedContext('clinician1', { clinician: true }).firestore();
+    const otherClinician = env.authenticatedContext('clinician2', { clinician: true }).firestore();
+    const caseData = { ownerUid: 'clinician1', code: 'CASE-01', assessment: 'Đánh giá', exercise: 'Bài tập', progress: 'Theo dõi', status: 'active', createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastHistoryId: 'h0' };
+    const caseRef = doc(clinician, 'clinicalCases/case1');
+    await assertFails(setDoc(caseRef, caseData));
+    const initial = writeBatch(clinician);
+    initial.set(caseRef, caseData);
+    initial.set(doc(clinician, 'clinicalCases/case1/history/h0'), { code: 'CASE-01', assessment: 'Đánh giá', exercise: 'Bài tập', progress: 'Theo dõi', status: 'active', createdAt: serverTimestamp() });
+    await assertSucceeds(initial.commit());
+    await assertFails(getDoc(doc(otherClinician, 'clinicalCases/case1')));
+    await assertFails(getDoc(doc(admin, 'clinicalCases/case1')));
+    await assertFails(setDoc(doc(owner, 'clinicalCases/case2'), { ...caseData, ownerUid: 'owner' }));
+    await assertFails(updateDoc(doc(otherClinician, 'clinicalCases/case1'), { progress: 'x', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(caseRef, { progress: 'Tiến bộ', lastHistoryId: 'missing', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(caseRef, { progress: 'Theo dõi', lastHistoryId: 'h0', updatedAt: serverTimestamp() }));
+    const mismatch = writeBatch(clinician);
+    mismatch.update(caseRef, { progress: 'Mới', lastHistoryId: 'bad', updatedAt: serverTimestamp() });
+    mismatch.set(doc(clinician, 'clinicalCases/case1/history/bad'), { code: 'CASE-01', assessment: 'Đánh giá', exercise: 'Bài tập', progress: 'Sai', status: 'active', createdAt: serverTimestamp() });
+    await assertFails(mismatch.commit());
+    const historyRef = doc(clinician, 'clinicalCases/case1/history/h1');
+    const batch = writeBatch(clinician);
+    batch.update(caseRef, { progress: 'Tiến bộ lần 2', lastHistoryId: 'h1', updatedAt: serverTimestamp() });
+    batch.set(historyRef, { code: 'CASE-01', assessment: 'Đánh giá', exercise: 'Bài tập', progress: 'Tiến bộ lần 2', status: 'active', createdAt: serverTimestamp() });
+    await assertSucceeds(batch.commit());
+    await assertSucceeds(getDoc(historyRef));
+    await assertFails(getDoc(doc(otherClinician, 'clinicalCases/case1/history/h1')));
+    await assertFails(updateDoc(historyRef, { progress: 'Sửa lịch sử' }));
+    const investor = env.authenticatedContext('investor1', { investor: true }).firestore();
+    const report = { title: 'Báo cáo', period: 'Quý 1', summary: 'Số liệu tổng hợp', users: 10, partners: 2, requests: 4, updatedAt: serverTimestamp() };
+    await assertFails(setDoc(doc(investor, 'investorReports/overview'), report));
+    await assertSucceeds(setDoc(doc(admin, 'investorReports/overview'), report));
+    await assertSucceeds(getDoc(doc(investor, 'investorReports/overview')));
+    await assertFails(getDoc(doc(owner, 'investorReports/overview')));
+    await assertFails(getDoc(doc(guest, 'investorReports/overview')));
+    await assertFails(getDoc(doc(investor, 'clinicalCases/case1')));
+    await assertFails(getDoc(doc(investor, 'leads/test')));
+    await assertFails(setDoc(doc(admin, 'investorReports/overview'), { ...report, users: -1 }));
+    const knowledge = {title:'Tri thức thử',category:'Chung',author:'Admin',content:'Nội dung thử',file:{name:'Tài liệu',url:'https://example.com/a',description:''},video:null,createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
+    await assertFails(setDoc(doc(owner,'knowledge/k1'),knowledge));
+    await assertSucceeds(setDoc(doc(admin,'knowledge/k1'),knowledge));
+    await assertSucceeds(getDoc(doc(guest,'knowledge/k1')));
+    await assertFails(setDoc(doc(admin,'knowledge/k2'),{...knowledge,file:{name:'Bad',url:'javascript:alert(1)',description:''}}));
+    await assertFails(setDoc(doc(admin,'knowledge/k3'),{...knowledge,content:'x'.repeat(20001)}));
   } finally { await env.cleanup(); }
 });

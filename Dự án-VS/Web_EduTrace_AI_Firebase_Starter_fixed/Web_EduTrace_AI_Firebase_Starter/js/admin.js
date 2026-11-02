@@ -27,6 +27,10 @@ import { createUsersCsv } from "./admin-csv.js";
 import { escapeHtml } from "./escape-html.js";
 import { accountFunctionsEnabled, manageUserAccount } from "./admin-functions.js";
 import "./gemini-cloud-client.js";
+import "./investor-admin.js";
+import "./knowledge-cloud.js";
+import { extractKnowledge } from "./knowledge-extract.js";
+import { knowledgeStorageAvailable, uploadKnowledgePdf, discardKnowledgePdf } from "./knowledge-storage.js";
 
 // Helper for toast notifications
 function showToast(message) {
@@ -68,7 +72,8 @@ function setupAdminApp() {
     tabUsers: document.getElementById("panelTabUsers"),
     tabBookings: document.getElementById("panelTabBookings"),
     tabSystem: document.getElementById("panelTabSystem"),
-    tabAIKnowledge: document.getElementById("panelTabAIKnowledge")
+    tabAIKnowledge: document.getElementById("panelTabAIKnowledge"),
+    tabInvestor: document.getElementById("panelTabInvestor")
   };
 
   // User Management Elements
@@ -806,6 +811,15 @@ function setupAdminApp() {
     const knContent = document.getElementById("knContent");
     const modalKnowledgeTitle = document.getElementById("modalKnowledgeTitle");
     const btnSubmitKnowledgeModal = document.getElementById("btnSubmitKnowledgeModal");
+    const extractPdf = document.getElementById('knExtractPdf');
+    const storeExtractPdf = document.getElementById('knStoreExtractPdf');
+    if (storeExtractPdf) storeExtractPdf.disabled = !knowledgeStorageAvailable();
+    const pdfStorageStatus = document.getElementById('knPdfStorageStatus');
+    if (pdfStorageStatus && knowledgeStorageAvailable()) pdfStorageStatus.textContent = 'Có thể lưu PDF gốc lên Firebase Storage khi lưu tri thức.';
+    const extractDraft = document.getElementById('knExtractDraft');
+    const extractStatus = document.getElementById('knExtractStatus');
+    const extractButtons = [document.getElementById('btnExtractPdf'), document.getElementById('btnExtractYoutube')];
+    let extractGeneration = 0;
 
     // File Elements
     const btnKnTabFileUpload = document.getElementById("btnKnTabFileUpload");
@@ -1000,6 +1014,8 @@ function setupAdminApp() {
 
     // Mở Modal (Chế độ Thêm mới hoặc Sửa)
     const openKnowledgeModal = (editItem = null) => {
+      extractGeneration++;
+      if (extractStatus) extractStatus.textContent = 'Chưa trích xuất.';
       currentAttachedFile = null;
       currentAttachedVideo = null;
       if (formAddKnowledge) formAddKnowledge.reset();
@@ -1060,6 +1076,7 @@ function setupAdminApp() {
     };
 
     const closeKnowledgeModal = () => {
+      extractGeneration++;
       if (modalAddKnowledgeBackdrop) modalAddKnowledgeBackdrop.style.display = "none";
       if (formAddKnowledge) formAddKnowledge.reset();
       currentAttachedFile = null;
@@ -1069,6 +1086,31 @@ function setupAdminApp() {
     btnAdminOpenAddKnowledge?.addEventListener("click", () => openKnowledgeModal(null));
     btnCloseKnowledgeModal?.addEventListener("click", closeKnowledgeModal);
     btnCancelKnowledgeModal?.addEventListener("click", closeKnowledgeModal);
+    async function runExtraction(kind) {
+      const generation = ++extractGeneration;
+      const source = kind === 'pdf' ? { kind, file: extractPdf?.files?.[0] } : { kind, url: knVideoUrl?.value.trim() };
+      const service = window.geminiService;
+      if (window.edutraceGeminiCloud) { extractStatus.textContent = 'Chức năng trích xuất chưa hỗ trợ chế độ Gemini trên máy chủ.'; return; }
+      extractButtons.forEach(button => { if (button) button.disabled = true; });
+      extractStatus.textContent = 'Đang gửi nguồn đến Gemini để tạo bản nháp...';
+      try {
+        const result = await extractKnowledge({ source, key: service?.getApiKey(), model: service?.getModel() });
+        if (generation !== extractGeneration) return;
+        extractDraft.value = result;
+        extractStatus.textContent = 'Đã tạo bản nháp. Hãy kiểm tra, chỉnh sửa và thêm vào nội dung trước khi lưu.';
+      } catch (error) { if (generation === extractGeneration) extractStatus.textContent = `Không trích xuất được: ${error.message}`; }
+      finally { extractButtons.forEach(button => { if (button) button.disabled = false; }); }
+    }
+    extractButtons[0]?.addEventListener('click', () => runExtraction('pdf'));
+    extractButtons[1]?.addEventListener('click', () => runExtraction('youtube'));
+    document.getElementById('btnUseExtractDraft')?.addEventListener('click', () => {
+      const draft = extractDraft?.value.trim();
+      if (!draft) { extractStatus.textContent = 'Chưa có bản nháp để thêm.'; return; }
+      const combined = [knContent.value.trim(), draft].filter(Boolean).join('\n\n');
+      if (combined.length > 20000) { extractStatus.textContent = 'Nội dung vượt quá 20.000 ký tự. Hãy rút gọn bản nháp.'; return; }
+      knContent.value = combined;
+      extractStatus.textContent = 'Đã thêm vào nội dung. Kiểm tra lại rồi nhấn Lưu.';
+    });
 
     // Xử lý Submit Form (Lưu hoặc Cập nhật)
     formAddKnowledge?.addEventListener("submit", async (e) => {
@@ -1089,22 +1131,20 @@ function setupAdminApp() {
         btnSubmitKnowledgeModal.textContent = "Đang nạp tri thức & tệp...";
       }
 
+      let uploadedPdfRef = null;
+      let knowledgeSaved = false;
       try {
         // 1. Chuẩn bị thông tin File
         let fileData = null;
-        if (currentAttachedFile && currentAttachedFile.fileObject) {
-          const storageKey = `kn_file_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-          if (window.saveMediaBlob) {
-            await window.saveMediaBlob(storageKey, currentAttachedFile.fileObject);
-          }
-          fileData = {
-            name: currentAttachedFile.name,
-            size: currentAttachedFile.size,
-            type: currentAttachedFile.type,
-            source: "upload",
-            storageKey: storageKey,
-            description: knFileDescription?.value.trim() || currentAttachedFile.name
-          };
+        if (storeExtractPdf?.checked) {
+          if (!extractPdf?.files?.[0]) throw new Error('Vui lòng chọn PDF để lưu.');
+          const uploaded = await uploadKnowledgePdf(extractPdf.files[0]);
+          uploadedPdfRef = uploaded.ref;
+          fileData = { name: uploaded.name, url: uploaded.url, description: uploaded.description, source: 'url' };
+        } else if (currentAttachedFile && currentAttachedFile.fileObject) {
+          const uploaded = await uploadKnowledgePdf(currentAttachedFile.fileObject);
+          uploadedPdfRef = uploaded.ref;
+          fileData = { name: uploaded.name, url: uploaded.url, description: knFileDescription?.value.trim() || uploaded.description, source: 'url' };
         } else if (knFileUrl && knFileUrl.value.trim()) {
           fileData = {
             name: knFileDescription?.value.trim() || "Tài liệu trực tuyến",
@@ -1121,17 +1161,7 @@ function setupAdminApp() {
         // 2. Chuẩn bị thông tin Video
         let videoData = null;
         if (currentAttachedVideo && currentAttachedVideo.fileObject) {
-          const storageKey = `kn_video_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-          if (window.saveMediaBlob) {
-            await window.saveMediaBlob(storageKey, currentAttachedVideo.fileObject);
-          }
-          videoData = {
-            title: knVideoTitle?.value.trim() || currentAttachedVideo.name,
-            source: "upload",
-            storageKey: storageKey,
-            size: currentAttachedVideo.size,
-            duration: "Video tải lên"
-          };
+          throw new Error('Chưa hỗ trợ lưu video tải lên cloud. Vui lòng dùng liên kết HTTPS.');
         } else if (knVideoUrl && knVideoUrl.value.trim()) {
           const vUrl = knVideoUrl.value.trim();
           const ytId = window.parseYouTubeId ? window.parseYouTubeId(vUrl) : null;
@@ -1159,16 +1189,22 @@ function setupAdminApp() {
         };
 
         if (id && window.updateDynamicKnowledge) {
-          window.updateDynamicKnowledge(id, payload);
-          showToast("Đã cập nhật tri thức và tệp/video cho AI thành công!");
+          await window.updateDynamicKnowledge(id, payload);
+          knowledgeSaved = true;
+          showToast("Đã cập nhật tri thức trên Firebase.");
         } else if (window.saveDynamicKnowledge) {
-          window.saveDynamicKnowledge(payload);
-          showToast("Đã nạp tri thức, tệp và video vào Gemini AI thành công!");
+          await window.saveDynamicKnowledge(payload);
+          knowledgeSaved = true;
+          showToast("Đã lưu tri thức trên Firebase.");
         }
 
         closeKnowledgeModal();
         renderAdminKnowledgeList();
       } catch (err) {
+        if (uploadedPdfRef && !knowledgeSaved) {
+          try { await discardKnowledgePdf(uploadedPdfRef); }
+          catch (cleanupError) { console.error('Không thể dọn PDF đã tải lên:', cleanupError); }
+        }
         console.error("Lỗi khi lưu tri thức:", err);
         showToast("❌ Gặp lỗi khi lưu tri thức: " + err.message);
       } finally {
@@ -1267,7 +1303,7 @@ function setupAdminApp() {
 
       // Nút Sửa
       adminKnowledgeTableBody.querySelectorAll(".btn-edit-knowledge").forEach((btn) => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           const id = btn.dataset.id;
           const target = list.find((k) => k.id === id);
           if (target) openKnowledgeModal(target);
@@ -1276,13 +1312,12 @@ function setupAdminApp() {
 
       // Nút Xóa
       adminKnowledgeTableBody.querySelectorAll(".btn-delete-knowledge").forEach((btn) => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           const id = btn.dataset.id;
           if (confirm("Bạn có chắc chắn muốn xóa mục tri thức này (kèm tệp và video) khỏi bộ nhớ AI?")) {
             if (window.deleteDynamicKnowledge) {
-              window.deleteDynamicKnowledge(id);
-              showToast("Đã xóa mục tri thức và tệp đính kèm!");
-              renderAdminKnowledgeList();
+              try { await window.deleteDynamicKnowledge(id); showToast("Đã xóa mục tri thức trên Firebase."); }
+              catch (err) { showToast("Không thể xóa tri thức: " + err.message); }
             }
           }
         });
@@ -1309,6 +1344,11 @@ function setupAdminApp() {
       });
     }
 
+    window.addEventListener('edutrace:knowledge-cloud-changed', event => {
+      const status = document.getElementById('knowledgeCloudStatus');
+      if (status) status.textContent = event.detail.ready ? `Đã kết nối Firebase: ${event.detail.count} mục. Nội dung và liên kết HTTPS được đồng bộ; tệp tải trực tiếp chưa được hỗ trợ.` : 'Chưa kết nối được kho tri thức Firebase. Không thể lưu thay đổi.';
+      renderAdminKnowledgeList();
+    });
     renderAdminKnowledgeList();
   }
 

@@ -9,9 +9,12 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig, firebaseConfigured } from "./firebase-config.js";
-import { recordUserActivity } from "./firebase-auth.js";
+import { getCurrentUser, recordUserActivity } from "./firebase-auth.js";
 import "./auth-ui.js";
 import "./gemini-cloud-client.js";
+import "./clinical-workspace.js";
+import "./investor-workspace.js";
+import "./knowledge-cloud.js";
 
 if (firebaseConfigured) {
   const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -66,6 +69,13 @@ if (firebaseConfigured) {
         console.warn("Không lưu được lịch sử trên trình duyệt:", error);
       }
       form.reset();
+      const user = getCurrentUser();
+      if (user && form.id === "consultationForm") {
+        form.elements.fullname.value = user.displayName || "";
+        form.elements.phone.value = user.phone || "";
+        form.elements.email.value = user.email || "";
+        if (["parent", "center", "doctor", "investor"].includes(user.role)) form.elements.role.value = user.role;
+      }
       showSafeToast(successMessage);
       return true;
     } catch (error) {
@@ -94,7 +104,8 @@ if (firebaseConfigured) {
         name: formValue(form, "fullname"),
         phone: formValue(form, "phone"),
         email: formValue(form, "email"),
-        role: formValue(form, "role")
+        role: formValue(form, "role"),
+        notes: formValue(form, "notes")
       };
 
       void submitToFirestore(

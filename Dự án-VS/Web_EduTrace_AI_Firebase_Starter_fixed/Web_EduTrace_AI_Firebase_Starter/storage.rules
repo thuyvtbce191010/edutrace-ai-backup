@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /knowledge-pdf/{fileId} {
+      allow read: if true;
+      allow create: if resource == null && request.auth != null && request.auth.token.admin == true
+        && request.resource.size > 0 && request.resource.size <= 8 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf';
+      allow update: if false;
+      allow delete: if request.auth != null && request.auth.token.admin == true;
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

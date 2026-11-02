@@ -17,3 +17,5 @@ export const accountFunctionsEnabled = false;
 // Cấu hình App Check và triển khai askGemini trước khi bật.
 export const geminiCloudEnabled = false;
 export const appCheckSiteKey = '';
+// Điền tên bucket sau khi Firebase Storage đã được cấu hình.
+export const knowledgeStorageBucket = '';

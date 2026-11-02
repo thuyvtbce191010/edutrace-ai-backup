@@ -222,6 +222,62 @@
   <!-- Mobile Navigation Backdrop Overlay -->
   <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
 
+  <section id="roleWorkspace" class="role-workspace" hidden aria-labelledby="roleWorkspaceTitle">
+    <div class="role-workspace-inner">
+      <div class="role-workspace-heading">
+        <div>
+          <span class="role-workspace-eyebrow" id="roleWorkspaceBadge"></span>
+          <h2 id="roleWorkspaceTitle"></h2>
+          <p id="roleWorkspaceGreeting"></p>
+        </div>
+        <button type="button" class="role-workspace-profile" id="roleWorkspaceProfile">Thông tin tài khoản <span aria-hidden="true">↗</span></button>
+      </div>
+      <div class="role-workspace-cards" id="doctorWorkspace" hidden>
+        <a class="role-workspace-card" href="#clinicalPanel"><span class="role-card-icon">✚</span><strong>Quản lý ca can thiệp</strong><span>Đánh giá, kế hoạch bài tập và tiến độ theo từng mã ca.</span><span class="role-card-link">Mở danh sách ca →</span></a>
+        <a class="role-workspace-card" href="#exercise-hub"><span class="role-card-icon">✚</span><strong>Kho bài tập can thiệp</strong><span>Xem các bài tập và video hướng dẫn hiện có.</span><span class="role-card-link">Xem bài tập →</span></a>
+        <a class="role-workspace-card" href="#ai-assistant-demo"><span class="role-card-icon">✦</span><strong>Trợ lý AI</strong><span>Mở công cụ tham vấn và khám phá tài nguyên hỗ trợ.</span><span class="role-card-link">Mở trợ lý →</span></a>
+        <a class="role-workspace-card" href="#contact"><span class="role-card-icon">✉</span><strong>Liên hệ hợp tác</strong><span>Gửi thông tin để kết nối với đội ngũ EduTrace.</span><span class="role-card-link">Gửi yêu cầu →</span></a>
+      </div>
+      <section id="clinicalPanel" hidden aria-labelledby="clinicalTitle" class="clinical-panel">
+        <h3 id="clinicalTitle">Quản lý ca can thiệp</h3>
+        <p id="clinicalMessage" role="status">Đang kiểm tra quyền truy cập...</p>
+        <div id="clinicalContent" hidden>
+          <p>Chỉ nhập mã ca; tránh ghi tên hoặc thông tin nhận dạng người bệnh.</p>
+          <div id="clinicalStats" aria-live="polite"></div>
+          <form id="clinicalForm">
+            <label>Mã ca <input class="form-control" name="code" required maxlength="80"></label>
+            <label>Đánh giá <textarea class="form-control" name="assessment" maxlength="2000"></textarea></label>
+            <label>Kế hoạch bài tập <textarea class="form-control" name="exercise" maxlength="2000"></textarea></label>
+            <label>Tiến độ <textarea class="form-control" name="progress" maxlength="2000"></textarea></label>
+            <label>Trạng thái <select class="form-control" name="status"><option value="active">Đang theo dõi</option><option value="completed">Đã hoàn thành</option></select></label>
+            <button type="submit" class="role-workspace-profile">Lưu ca</button> <button type="button" id="clinicalReset">Tạo ca mới</button>
+          </form>
+          <h4>Danh sách ca của bạn</h4><div id="clinicalList"></div>
+          <section id="clinicalHistory" hidden aria-labelledby="clinicalHistoryTitle"><h4 id="clinicalHistoryTitle">Lịch sử ca</h4><p id="clinicalHistoryStatus" role="status"></p><div id="clinicalHistoryList"></div></section>
+        </div>
+      </section>
+      <div class="role-workspace-cards" id="investorWorkspace" hidden>
+        <a class="role-workspace-card" href="#investorReportPanel"><span class="role-card-icon">▤</span><strong>Báo cáo tổng hợp</strong><span>Xem số liệu đã được quản trị viên công bố.</span><span class="role-card-link">Xem báo cáo →</span></a>
+        <a class="role-workspace-card" href="#overview-process"><span class="role-card-icon">◈</span><strong>Mô hình hoạt động</strong><span>Tìm hiểu cách EduTrace kết nối phụ huynh và trung tâm.</span><span class="role-card-link">Xem quy trình →</span></a>
+        <a class="role-workspace-card" href="#pricing"><span class="role-card-icon">◫</span><strong>Sản phẩm và dịch vụ</strong><span>Khám phá các gói dịch vụ đang giới thiệu.</span><span class="role-card-link">Xem dịch vụ →</span></a>
+        <a class="role-workspace-card" href="#contact"><span class="role-card-icon">✉</span><strong>Liên hệ đầu tư</strong><span>Để lại thông tin để trao đổi cùng đội ngũ dự án.</span><span class="role-card-link">Gửi yêu cầu →</span></a>
+      </div>
+      <section id="investorReportPanel" class="clinical-panel" hidden aria-labelledby="investorReportTitle">
+        <h3 id="investorReportTitle">Báo cáo dành cho nhà đầu tư</h3>
+        <p id="investorReportStatus" role="status">Đang kiểm tra quyền...</p>
+        <div id="investorReportContent" hidden>
+          <h4 id="investorReportName"></h4><p id="investorReportPeriod"></p><p id="investorReportSummary"></p>
+          <table><thead><tr><th>Chỉ số</th><th>Giá trị</th></tr></thead><tbody>
+            <tr><td>Người dùng</td><td id="investorReportUsers"></td></tr>
+            <tr><td>Đối tác</td><td id="investorReportPartners"></td></tr>
+            <tr><td>Yêu cầu</td><td id="investorReportRequests"></td></tr>
+          </tbody></table><p id="investorReportUpdated"></p>
+        </div>
+      </section>
+      <div class="role-workspace-footer"><span>Thông tin hồ sơ được quản lý trong tài khoản của bạn.</span><button type="button" id="roleWorkspaceHistory">Yêu cầu đã gửi trên thiết bị này →</button></div>
+    </div>
+  </section>
+
   <!-- ==========================================================================
        HERO SECTION (MEDICAL CLINICAL STYLE - MATCHING VITALCARE THEME)
        ========================================================================== -->
@@ -1789,7 +1845,7 @@
 
             <div class="form-group">
               <label class="form-label">Nhu cầu hoặc tình trạng trẻ cần hỗ trợ</label>
-              <textarea name="notes" class="form-control" rows="4"
+              <textarea name="notes" class="form-control" rows="4" maxlength="2000"
                 placeholder="Chia sẻ độ tuổi của trẻ, biểu hiện chậm nói, tự kỷ, tăng động hoặc câu hỏi về gian hàng đối tác B2B..."></textarea>
             </div>
 

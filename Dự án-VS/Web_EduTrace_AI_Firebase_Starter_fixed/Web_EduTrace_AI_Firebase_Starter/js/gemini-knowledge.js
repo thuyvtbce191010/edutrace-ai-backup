@@ -358,6 +358,7 @@ function formatFileSize(bytes) {
  * @returns {Array} Danh sách các mục kiến thức đã lưu
  */
 function getStoredDynamicKnowledge() {
+  if (window.edutraceCloudKnowledgeItems) return window.edutraceCloudKnowledgeItems();
   try {
     const raw = localStorage.getItem(STORAGE_KEY_DYNAMIC_KNOWLEDGE);
     if (!raw) return [];
