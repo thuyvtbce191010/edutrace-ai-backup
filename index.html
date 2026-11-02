@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="EduTrace AI - Nền tảng kết nối trực tuyến giữa Trung tâm can thiệp và Phụ huynh có con tự kỷ (ASD), tăng động giảm chú ý (ADHD), chậm nói (1.5 - 10 tuổi) qua Trợ lý AI tư vấn cá nhân hóa và phễu trao giá trị trước (Value-First). Đề án Khởi nghiệp EXE101 - FPT University Cần Thơ.">
+  <meta name="keywords"
+    content="EduTrace AI, Can thiệp sớm, Tự kỷ ASD, ADHD, Trẻ chậm nói, Trợ lý AI tư vấn, Value-First, Đại học FPT Cần Thơ, Ninh Kiều, Giáo dục đặc biệt, EXE101">
+  <meta name="author" content="EduTrace AI Team - FPT University Can Tho">
+
+  <title>EduTrace AI | Nền Tảng Trí Tuệ Nhân Tạo Kết Nối & Can Thiệp Giáo Dục Đặc Biệt</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ==========================================================================
+       TOP ANNOUNCEMENT BAR
+       ========================================================================== -->
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-bar-badge">
+        <span class="top-bar-pulse"></span>
+        <span>Đề án Khởi nghiệp EXE101 • Trường Đại học FPT Cần Thơ • Nhóm 6 (EXE101-G06)</span>
+      </div>
+      <div class="top-bar-links">
+        <a href="https://www.facebook.com/edutrace.ai.official" target="_blank" rel="noopener noreferrer"
+          class="top-bar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+          </svg>
+          Fanpage EduTrace AI
+        </a>
+        <a href="mailto:edutrace.ai.assistant@gmail.com" class="top-bar-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          edutrace.ai.assistant@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MAIN NAVBAR
+       ========================================================================== -->
+  <header class="navbar" id="navbar">
+    <div class="container nav-container">
+      <a href="#home" class="nav-brand">
+        <img src="images/logo.jpg" alt="EduTrace AI Logo" class="nav-logo-img">
+        <div class="nav-brand-text">
+          <h1>EduTrace <span>AI</span></h1>
+          <span class="nav-brand-sub">Special Education Value-First Platform</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Menu -->
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#home" class="nav-link active">Trang chủ</a></li>
+          <li><a href="#overview-process" class="nav-link">Quy trình 4 bước</a></li>
+          <li><a href="#market-pain" class="nav-link">Nỗi đau thị trường</a></li>
+          <li><a href="#ai-assistant-demo" class="nav-link">Trợ lý AI</a></li>
+          <li><a href="#exercise-hub" class="nav-link">Kho bài tập</a></li>
+          <li><a href="#partners-directory" class="nav-link">Hồ sơ đơn vị</a></li>
+          <li><a href="#data-moderation" class="nav-link">Kiểm duyệt 2 lớp</a></li>
+          <li><a href="#pricing" class="nav-link">Bảng giá</a></li>
+          <li class="mobile-auth-divider"></li>
+          <li class="mobile-auth-guest" id="mobileAuthGuest">
+            <button type="button" class="btn btn-outline-light" id="mobileLoginBtn">Đăng Nhập</button>
+            <button type="button" class="btn btn-primary" id="mobileRegisterBtn">Đăng Ký Tài Khoản</button>
+          </li>
+          <li class="mobile-auth-user" id="mobileAuthUser" style="display: none;">
+            <div class="mobile-user-card">
+              <div>
+                <span class="mobile-user-name" id="mobileUserName">Người dùng</span>
+                <span class="mobile-user-role" id="mobileUserRole">Phụ huynh</span>
+              </div>
+            </div>
+            <div class="mobile-user-actions" style="flex-direction: column; gap: 8px;">
+              <a href="admin.html" class="btn btn-outline-light" id="mobileAdminPortal" style="display: none; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); text-align: center;">🛡️ Trang Quản Trị (Admin)</a>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-outline-light" id="mobileProfileBtn">Hồ Sơ &amp; Lịch Hẹn</button>
+                <button type="button" class="btn btn-outline-light" id="mobileLogoutBtn" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4);">Đăng Xuất</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#ai-assistant-demo" class="btn btn-sm btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Thử AI
+        </a>
+
+        <!-- Guest Actions -->
+        <div class="auth-nav-guest" id="authNavGuest">
+          <button type="button" class="btn-nav-login" id="navLoginBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            Đăng Nhập
+          </button>
+          <button type="button" class="btn-nav-register" id="navRegisterBtn">
+            Đăng Ký
+          </button>
+        </div>
+
+        <!-- Authenticated User Dropdown -->
+        <div class="auth-nav-user" id="authNavUser" style="display: none;">
+          <button type="button" class="nav-user-pill" id="navUserMenuToggle" aria-expanded="false">
+            <div class="nav-user-avatar" id="navUserAvatar">U</div>
+            <div class="nav-user-meta">
+              <span class="nav-user-name" id="navUserName">Người dùng</span>
+              <span class="nav-user-role-badge" id="navUserRole">Phụ huynh</span>
+            </div>
+            <svg class="nav-user-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="nav-user-dropdown" id="navUserDropdown">
+            <div class="dropdown-user-header">
+              <div class="dropdown-avatar" id="dropdownUserAvatar">U</div>
+              <div class="dropdown-info">
+                <strong id="dropdownUserName">Người dùng</strong>
+                <span id="dropdownUserEmail">email@example.com</span>
+                <span class="user-role-pill" id="dropdownUserRole">Phụ huynh</span>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-item" id="btnOpenUserProfile">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Thông tin tài khoản</span>
+            </button>
+            <button type="button" class="dropdown-item" id="btnOpenUserBookings">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>Lịch hẹn &amp; Yêu cầu đã gửi</span>
+              <span class="badge-count" id="userBookingsCount" style="display: none;">0</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <a href="admin.html" class="dropdown-item" id="btnAdminPortal" style="display: none; color: #38bdf8; font-weight: 700;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>Trang Quản Trị (Admin Portal)</span>
+            </a>
+            <button type="button" class="dropdown-item dropdown-item-danger" id="btnLogout">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Đăng xuất</span>
+            </button>
+          </div>
+        </div>
+
+        <button class="mobile-toggle" aria-label="Mở menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       HERO SECTION
+       ========================================================================== -->
+  <section id="home" class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-badge-wrap">
+          <span class="hero-badge-dot"></span>
+          <span class="hero-badge-text">Bản Đề Xuất Dự Án Khởi Nghiệp • FPT University Cần Thơ</span>
+        </div>
+
+        <h1 class="hero-title">
+          Nền Tảng Kết Nối Trung Tâm &amp; Phụ Huynh Bằng <span class="highlight">Trợ Lý AI Cá Nhân Hóa</span> &amp;
+          Phễu Trao Giá Trị Trước
+        </h1>
+
+        <p class="hero-desc">
+          EduTrace AI kết nối trực tuyến giữa các <strong>trung tâm can thiệp sớm / trường mầm non hòa nhập</strong> với
+          phụ huynh có con mắc <strong>hội chứng tự kỷ (ASD), tăng động giảm chú ý (ADHD) hoặc chậm nói (1,5 – 10
+            tuổi)</strong>.
+          Phụ huynh chia sẻ tự do -> AI gợi ý video bài tập <strong>3 – 5 phút</strong> phù hợp nhất để tự rèn luyện tại
+          nhà
+          <strong>không cần camera hay thuật toán phức tạp</strong> -> Tự tin chuyển đổi đăng ký can thiệp trực tiếp
+          1-1.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#ai-assistant-demo" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Trải Nghiệm Trợ Lý AI Tư Vấn
+          </a>
+          <a href="#overview-process" class="btn btn-outline-light">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Khám Phá Quy Trình 4 Bước
+          </a>
+        </div>
+
+        <!-- 4 Key Metrics From Proposal -->
+        <div class="hero-stats-row">
+          <div class="hero-stat-item">
+            <h3>80 Mẫu</h3>
+            <p>Khảo sát thực địa Cần Thơ (10 chuyên gia &amp; 70 phụ huynh)</p>
+          </div>
+          <div class="hero-stat-item">
+            <h3>3 – 5 Phút</h3>
+            <p>Bài tập video thực hành chuẩn tại nhà, không rào cản công nghệ</p>
+          </div>
+          <div class="hero-stat-item">
+            <h3>80%</h3>
+            <p>Trung tâm sẵn sàng đăng bài tập &amp; mở gian hàng B2B</p>
+          </div>
+          <div class="hero-stat-item">
+            <h3>82%</h3>
+            <p>Phụ huynh sẵn sàng trả phí nhỏ trải nghiệm bài tập chuẩn</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Showcase -->
+      <div class="hero-visual">
+        <div class="hero-card-frame">
+          <div class="hero-screen-header">
+            <div class="screen-dots">
+              <span class="screen-dot dot-red"></span>
+              <span class="screen-dot dot-yellow"></span>
+              <span class="screen-dot dot-green"></span>
+            </div>
+            <span class="screen-title">EduTrace AI • Value-First Funnel Engine</span>
+            <div class="screen-live-tag">
+              <span class="screen-live-dot"></span>
+              <span>AI CONSULTATION ACTIVE</span>
+            </div>
+          </div>
+
+          <img src="images/edutrace_mockup.jpg" alt="EduTrace AI Trợ lý tư vấn & Kho bài tập" class="hero-mockup-img">
+
+          <!-- Floating Badges -->
+          <div class="hero-floating-badge badge-pos-1">
+            <div class="floating-icon icon-blue">💬</div>
+            <div class="floating-text">
+              <strong>Trợ Lý AI Phân Tích Nhu Cầu</strong>
+              <span>Bóc tách từ khóa độ tuổi &amp; kỹ năng thiếu hụt</span>
+            </div>
+          </div>
+
+          <div class="hero-floating-badge badge-pos-2">
+            <div class="floating-icon icon-green">🎯</div>
+            <div class="floating-text">
+              <strong>Mô Hình Value-First</strong>
+              <span>Tập thử tại nhà -> Kết nối can thiệp 1-1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       TARGET AUDIENCE & SPECIAL NEEDS (1.5 - 10 TUỔI)
+       ========================================================================== -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Đối Tượng Trọng Tâm (1,5 – 10 Tuổi)</span>
+        <h2 class="section-title">Giải Pháp Đồng Hành Cùng Trẻ Có Nhu Cầu Đặc Biệt</h2>
+        <p class="section-subtitle">
+          EduTrace AI được thiết kế chuyên biệt để hỗ trợ ba nhóm trẻ phổ biến nhất hiện nay, cung cấp nguồn bài tập
+          thực hành 3 – 5 phút từ các trung tâm uy tín và phễu kết nối chuyên môn.
+        </p>
+      </div>
+
+      <div class="target-grid">
+        <!-- Target 1: ASD -->
+        <div class="target-card">
+          <div class="target-img-wrap">
+            <img src="images/image1.jpg" alt="Trẻ Tự Kỷ ASD Can Thiệp Sớm">
+            <span class="target-badge">Phổ Tự Kỷ (ASD)</span>
+          </div>
+          <h3>Trẻ Mắc Hội Chứng Tự Kỷ (ASD)</h3>
+          <p>
+            Trẻ gặp khó khăn trong tương tác mắt (Eye-contact), phản xạ tương tác xã hội và thường xuất hiện các hành vi
+            rập khuôn (Stimming) như vỗ tay, đung đưa người khi bị quá tải giác quan.
+          </p>
+          <ul class="target-features">
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Bài tập tương tác ánh mắt qua gương cảm xúc (3–4 phút)
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Kỹ thuật xoa dịu giác quan giảm bộc phát hành vi rập khuôn
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Kết nối trực tiếp trung tâm can thiệp chuyên biệt 1-1
+            </li>
+          </ul>
+        </div>
+
+        <!-- Target 2: ADHD -->
+        <div class="target-card">
+          <div class="target-img-wrap">
+            <img src="images/image2.jpg" alt="Trẻ Tăng Động Giảm Chú Ý ADHD">
+            <span class="target-badge">Tăng Động (ADHD)</span>
+          </div>
+          <h3>Trẻ Tăng Động Giảm Chú Ý (ADHD)</h3>
+          <p>
+            Khó duy trì sự tập trung (Attention Span ngắn dưới 2 phút), thường xuyên bồn chồn, chạy nhảy không ngừng,
+            khó kiềm chế bộc phát và gặp trở ngại khi chuẩn bị vào lớp 1.
+          </p>
+          <ul class="target-features">
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Trò chơi vận động có luật đơn giản rèn luyện ức chế hành vi
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Bài tập thăng bằng &amp; phối hợp vận động kéo dài chú ý
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Lộ trình rèn luyện hành vi tại nhà trước khi đến lớp hòa nhập
+            </li>
+          </ul>
+        </div>
+
+        <!-- Target 3: Speech Delay -->
+        <div class="target-card">
+          <div class="target-img-wrap">
+            <img src="images/image3.jpg" alt="Trẻ Chậm Phát Triển Ngôn Ngữ & Trung Tâm Can Thiệp">
+            <span class="target-badge">Chậm Phát Triển Ngôn Ngữ</span>
+          </div>
+          <h3>Trẻ Chậm Nói &amp; Chậm Bật Âm Đơn</h3>
+          <p>
+            Trẻ từ 1.5 – 3 tuổi chưa biết nói từ đơn, gọi tên không quay đầu, chỉ biết kéo tay người lớn khi cần đồ vật
+            và gặp khó khăn trong việc bắt chước âm thanh môi miệng.
+          </p>
+          <ul class="target-features">
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Kỹ thuật thổi bóng xà phòng &amp; kích thích bật âm /a/, /ba/
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Bài tập vận động cơ môi lưỡi và chỉ tay giao tiếp nhu cầu
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Đăng ký đưa con đến trung tâm can thiệp âm ngữ trị liệu 1-1
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MỤC 1: TỔNG QUAN DỰ ÁN & QUY TRÌNH VẬN HÀNH 4 BƯỚC KHÉP KÍN
+       ========================================================================== -->
+  <section id="overview-process" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Cơ Chế Vận Hành Dự Án</span>
+        <h2 class="section-title">Quy Trình 4 Bước Khép Kín: Phễu Trao Giá Trị Trước (Value-First)</h2>
+        <p class="section-subtitle">
+          EduTrace AI vận hành theo cơ chế tư vấn trí tuệ nhân tạo và phễu chuyển đổi trao giá trị trước.
+          Phụ huynh tự cho con rèn luyện tại nhà với bài tập 3 – 5 phút bình thường mà không cần camera phức tạp,
+          khi thấy con đáp ứng tốt sẽ chủ động đưa con đến chính trung tâm đó để can thiệp 1-1.
+        </p>
+      </div>
+
+      <div class="process-grid">
+        <!-- Step 1 -->
+        <div class="process-card">
+          <div class="process-step-header">
+            <span class="process-badge">BƯỚC 01</span>
+            <span class="process-value-tag">Tự do &amp; Thấu cảm</span>
+          </div>
+          <div class="process-icon-box">💬</div>
+          <h4>Phụ Huynh Chia Sẻ Tự Do Với Trợ Lý AI</h4>
+          <p>
+            Phụ huynh chỉ cần gõ hoặc nói chia sẻ tự do về tình trạng của con trên trang web: độ tuổi, các biểu hiện
+            chậm nói,
+            thiếu tập trung hay hành vi bộc phát mà không phải điền biểu mẫu rườm rà.
+          </p>
+          <span class="process-value-tag">Đầu vào: Giọng nói / Chữ gõ</span>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="process-card">
+          <div class="process-step-header">
+            <span class="process-badge">BƯỚC 02</span>
+            <span class="process-value-tag">Phân tích trúng đích</span>
+          </div>
+          <div class="process-icon-box">🧠</div>
+          <h4>AI Bóc Tách Từ Khóa &amp; Gợi Ý Bài Tập</h4>
+          <p>
+            Hệ thống tự động phân tích nhu cầu về độ tuổi và kỹ năng thiếu hụt (phát triển ngôn ngữ, điều hòa hành
+            vi...),
+            đối soát dữ liệu và đề xuất <strong>2 đến 3 video bài tập từ 3 – 5 phút</strong> từ các trung tâm đối tác uy
+            tín.
+          </p>
+          <span class="process-value-tag">Gợi ý 2 – 3 video chuẩn</span>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="process-card">
+          <div class="process-step-header">
+            <span class="process-badge">BƯỚC 03</span>
+            <span class="process-value-tag">Không rào cản công nghệ</span>
+          </div>
+          <div class="process-icon-box">🏠</div>
+          <h4>Phụ Huynh &amp; Con Tự Tập Tại Nhà</h4>
+          <p>
+            Phụ huynh xem video hướng dẫn trực quan do chính giáo viên trung tâm thực hiện và tự cho con thực hành các
+            bài tập
+            tại nhà <strong>mà không cần sự can thiệp của camera hay thuật toán phức tạp</strong>.
+          </p>
+          <span class="process-value-tag">Video 3 – 5 phút trực quan</span>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="process-card">
+          <div class="process-step-header">
+            <span class="process-badge">BƯỚC 04</span>
+            <span class="process-value-tag">Chuyển đổi tự nhiên</span>
+          </div>
+          <div class="process-icon-box">🤝</div>
+          <h4>Chủ Động Đăng Ký Can Thiệp Trực Tiếp 1-1</h4>
+          <p>
+            Khi thấy con đáp ứng tốt và thích hợp với phương pháp của trung tâm nào, phụ huynh sẽ chủ động bấm nút
+            đăng ký đưa con đến chính trung tâm đó để học can thiệp trực tiếp 1-1.
+          </p>
+          <span class="process-value-tag">Đăng ký học trực tiếp 1-1</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MỤC 2: BÀI TOÁN THỊ TRƯỜNG & NỖI ĐAU CỦA CÁC BÊN
+       ========================================================================== -->
+  <section id="market-pain" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Khảo Sát Thực Địa N=80 Mẫu</span>
+        <h2 class="section-title">Bài Toán Thị Trường &amp; Nỗi Đau Lớn Của Các Bên Tại Cần Thơ</h2>
+        <p class="section-subtitle">
+          Kết quả khảo sát thực địa với quy mô <strong>80 mẫu (gồm 10 chuyên gia/đại diện trung tâm và 70 phụ huynh tại
+            TP. Cần Thơ)</strong>
+          chỉ ra các điểm nghẽn lớn trong lĩnh vực can thiệp giáo dục đặc biệt:
+        </p>
+      </div>
+
+      <div class="pain-solution-grid">
+        <!-- Center Pain 1 -->
+        <div class="ps-card">
+          <div class="ps-header">
+            <span class="ps-number">TRUNG TÂM CAN THIỆP • ĐIỂM NGHẼN 01</span>
+            <h3>Tuyển Sinh Khó Khăn &amp; Tốn Kém</h3>
+          </div>
+          <div class="ps-pain-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Nỗi Đau Thực Tế
+            </h4>
+            <p>
+              Quảng cáo truyền thống (Facebook Ads, tờ rơi) tốn kém nhưng hiệu quả thấp vì phụ huynh cần kiểm chứng
+              uy tín chuyên môn thực tế trước khi nộp tiền học cho con.
+            </p>
+          </div>
+          <div class="ps-solution-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Giải Pháp Từ EduTrace AI
+            </h4>
+            <p>
+              Gian hàng thương hiệu B2B và mô hình Value-First: Phụ huynh cho con tập thử bài tập video của trung tâm
+              trước,
+              khi thấy con tiến bộ sẽ tự nguyện đăng ký học trực tiếp 1-1.
+            </p>
+          </div>
+          <div class="ps-metric-tag">
+            <span>Hiệu quả:</span>
+            <strong>Tuyển sinh chuẩn tệp phụ huynh cần</strong>
+          </div>
+        </div>
+
+        <!-- Center Pain 2 -->
+        <div class="ps-card">
+          <div class="ps-header">
+            <span class="ps-number">TRUNG TÂM CAN THIỆP • ĐIỂM NGHẼN 02</span>
+            <h3>Thiếu Kênh Quảng Bá &amp; Giữ Chân Học Viên</h3>
+          </div>
+          <div class="ps-pain-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Nỗi Đau Thực Tế
+            </h4>
+            <p>
+              Chưa có môi trường để giới thiệu bài tập và phương pháp dạy đến đúng tệp phụ huynh. Đồng thời thiếu công
+              cụ
+              hỗ trợ phụ huynh duy trì việc tập luyện tại nhà khiến tỷ lệ giữ chân học viên thấp.
+            </p>
+          </div>
+          <div class="ps-solution-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Giải Pháp Từ EduTrace AI
+            </h4>
+            <p>
+              Cung cấp kho bài tập video 3-5 phút kèm thông tin đội ngũ chuyên gia, chứng chỉ và nút hỏi đáp trực tiếp
+              giúp gắn kết bền chặt giữa trung tâm và phụ huynh.
+            </p>
+          </div>
+          <div class="ps-metric-tag">
+            <span>Tăng gắn kết:</span>
+            <strong>Duy trì tập luyện tại nhà mỗi ngày</strong>
+          </div>
+        </div>
+
+        <!-- Parent Pain 1 -->
+        <div class="ps-card">
+          <div class="ps-header">
+            <span class="ps-number">PHỤ HUYNH • ĐIỂM NGHẼN 03</span>
+            <h3>Bất An, Bối Rối &amp; Hoài Nghi</h3>
+          </div>
+          <div class="ps-pain-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Nỗi Đau Thực Tế
+            </h4>
+            <p>
+              Khi thấy con chậm nói hoặc tự kỷ, phụ huynh không biết bắt đầu từ đâu, nên cho con tập bài gì và chọn
+              trung tâm nào.
+              <strong>78% phụ huynh hoài nghi</strong> các lời quảng cáo chung chung.
+            </p>
+          </div>
+          <div class="ps-solution-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Giải Pháp Từ EduTrace AI
+            </h4>
+            <p>
+              Trợ lý AI thấu cảm, bóc tách nhu cầu cụ thể để đưa ra bài tập trúng đích đã được kiểm duyệt 2 lớp y khoa,
+              xóa tan hoàn toàn sự mù mờ của cha mẹ.
+            </p>
+          </div>
+          <div class="ps-metric-tag">
+            <span>Niềm tin:</span>
+            <strong>Bài tập chuẩn y khoa &amp; M-CHAT-R/F</strong>
+          </div>
+        </div>
+
+        <!-- Parent Pain 2 -->
+        <div class="ps-card">
+          <div class="ps-header">
+            <span class="ps-number">PHỤ HUYNH • ĐIỂM NGHẼN 04</span>
+            <h3>Rào Cản Học Phí Trực Tiếp Quá Lớn</h3>
+          </div>
+          <div class="ps-pain-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Nỗi Đau Thực Tế
+            </h4>
+            <p>
+              Học phí can thiệp trực tiếp tại Cần Thơ dao động từ <strong>4 – 6 triệu đồng/tháng</strong> (và 7 – 25
+              triệu ở các đô thị lớn).
+              Phụ huynh ngại đầu tư số tiền lớn khi chưa biết con có hợp phương pháp hay không.
+            </p>
+          </div>
+          <div class="ps-solution-box">
+            <h4>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Giải Pháp Từ EduTrace AI
+            </h4>
+            <p>
+              Gói B2C chỉ <strong>199.000 VNĐ/tháng</strong> (hoặc 1.890.000 VNĐ/năm) cho phép tập thử tại nhà,
+              kiểm chứng sự phù hợp của phương pháp trước khi quyết định can thiệp trực tiếp.
+            </p>
+          </div>
+          <div class="ps-metric-tag">
+            <span>Tiết kiệm:</span>
+            <strong>Giảm rủi ro tài chính cho gia đình</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MỤC 3: GIẢI PHÁP VÀ CƠ CHẾ VẬN HÀNH (TRỢ LÝ AI & KHO BÀI TẬP B2B)
+       ========================================================================== -->
+  <section id="ai-assistant-demo" class="section section-dark">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Trải Nghiệm Tương Tác Trực Tiếp</span>
+        <h2 class="section-title">Trợ Lý AI Tư Vấn Cá Nhân Hóa &amp; Kho Bài Tập Đối Tác B2B</h2>
+        <p class="section-subtitle">
+          Khám phá cơ chế vận hành thực tế: Phụ huynh chia sẻ tình trạng con -> Trí tuệ nhân tạo bóc tách từ khóa độ
+          tuổi
+          và kỹ năng thiếu hụt -> Đối soát gợi ý 2 đến 3 video bài tập 3 – 5 phút từ các trung tâm uy tín tại Ninh Kiều.
+        </p>
+      </div>
+
+      <!-- AI Assistant Workbench -->
+      <div class="ai-workbench">
+        <!-- Header -->
+        <div class="ai-workbench-header">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div class="ai-status-indicator">
+              <span class="top-bar-pulse"></span>
+              <span>TRỢ LÝ TƯ VẤN EDUTRACE AI • ON-DEMAND ENGINE</span>
+            </div>
+            <span class="gemini-badge" id="geminiModeBadge">⚡ Chế độ: Phác đồ chuẩn Bác sĩ Nhi Cần Thơ & M-CHAT-R/F</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-config-gemini" id="btnConfigGemini" title="Nhập Google Gemini API Key để kích hoạt AI trực tiếp">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              <span>Kết Nối Gemini AI Key</span>
+            </button>
+            <div style="font-size: 0.8rem; color: #94a3b8; font-family: var(--font-mono);">
+              Kiểm duyệt: 2 Lớp (Pháp lý + M-CHAT-R/F)
+            </div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="ai-workbench-body">
+          <!-- Left Column: Parent Input & Quick Scenarios -->
+          <div class="ai-input-column">
+            <div>
+              <div class="scenario-chips-label">Chọn tình huống mẫu từ khảo sát thực địa Cần Thơ:</div>
+              <div class="scenario-chips-wrap">
+                <button class="scenario-chip-btn active" data-scenario="scenario1">
+                  <strong>Tình huống 1: Bé Bo (2.5 tuổi)</strong>
+                  <span>Chưa biết nói từ đơn • Ít giao tiếp mắt • Kéo tay khi cần đồ</span>
+                </button>
+                <button class="scenario-chip-btn" data-scenario="scenario2">
+                  <strong>Tình huống 2: Bé Minh (4 tuổi)</strong>
+                  <span>Tự kỷ ASD • Đung đưa người &amp; vỗ tay khi ồn • Quá tải giác quan</span>
+                </button>
+                <button class="scenario-chip-btn" data-scenario="scenario3">
+                  <strong>Tình huống 3: Bé An (5 tuổi)</strong>
+                  <span>Tăng động ADHD • Khó ngồi yên quá 2 phút • Kém kiềm chế bộc phát</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom Input Box -->
+            <div class="ai-text-input-wrap">
+              <label class="scenario-chips-label" for="aiCustomInput">Hoặc nhập chia sẻ tự do tình trạng của con
+                bạn:</label>
+              <textarea id="aiCustomInput" class="ai-textarea" rows="4"
+                placeholder="Ví dụ: Bé nhà mình 3 tuổi, chưa biết nói từ ba mẹ, gọi tên ít quay lại, hay kiễng chân khi đi..."></textarea>
+
+              <div class="ai-input-controls">
+                <button type="button" class="btn-ai-voice" id="btnAIVoice" title="Nói qua micro">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                  Nói / Ghi âm
+                </button>
+                <button type="button" class="btn-ai-analyze" id="btnAIAnalyze">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  Phân Tích Bằng Trợ Lý AI
+                </button>
+              </div>
+            </div>
+
+            <div
+              style="font-size: 0.78rem; color: #94a3b8; line-height: 1.5; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;">
+              💡 <strong>Lợi thế cốt lõi:</strong> Phụ huynh chia sẻ tự do không cần thuật ngữ y khoa phức tạp. Hệ thống
+              tự động bóc tách từ khóa và đối soát phác đồ để tìm video bài tập 3-5 phút sát thực tế nhất.
+            </div>
+          </div>
+
+          <!-- Right Column: AI Analysis & Recommended Exercises -->
+          <div class="ai-output-column">
+            <!-- Analysis Result Card -->
+            <div class="ai-analysis-card">
+              <div class="ai-analysis-header">
+                <h4>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                  Kết Quả Bóc Tách Từ Khóa &amp; Nhu Cầu Can Thiệp
+                </h4>
+                <span style="font-size: 0.75rem; color: #34d399; font-weight: 700;">✓ ĐÃ ĐỐI SOÁT XONG</span>
+              </div>
+
+              <div class="keyword-tags-wrap" id="aiAnalysisKeywords">
+                <!-- Dynamically rendered via script.js -->
+              </div>
+
+              <div class="ai-advice-bubble" id="aiAdviceText">
+                <!-- Advice message rendered via script.js -->
+              </div>
+            </div>
+
+            <!-- Recommended Exercise List -->
+            <div>
+              <div class="recom-section-title">
+                <h5>Kho Bài Tập Đối Tác Đề Xuất (Video 3 – 5 Phút Chuẩn Hóa):</h5>
+                <span style="font-size: 0.78rem; color: #38bdf8; font-weight: 600;">Gian hàng B2B đã xác thực</span>
+              </div>
+
+              <div class="exercise-list-wrap" id="recommendedExerciseList" style="margin-top: 12px;">
+                <!-- Dynamically populated cards from script.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MỤC 3.2: KHO BÀI TẬP CAN THIỆP SỚM CHUẨN Y KHOA (VIDEO 3 - 5 PHÚT)
+       ========================================================================== -->
+  <section id="exercise-hub" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Thực Hành Tại Nhà Chuẩn Y Khoa</span>
+        <h2 class="section-title">Kho Bài Tập Can Thiệp Sớm 3 – 5 Phút (Do Bác Sĩ &amp; Trung Tâm Đăng Tải)</h2>
+        <p class="section-subtitle">
+          Các bài tập trực quan, dễ thực hiện với giáo cụ sẵn có trong gia đình. Phân loại chuẩn hóa theo từng độ tuổi và dạng khó khăn (Chậm nói, Tự kỷ ASD, Tăng động ADHD, Điều hòa cảm giác).
+        </p>
+      </div>
+
+      <!-- Exercise Hub Filter Bar -->
+      <div class="hub-filter-wrapper">
+        <div class="hub-categories-tabs" id="hubCategoryTabs">
+          <button type="button" class="hub-tab-btn active" data-category="all">Tất Cả Bài Tập (<span id="hubCountAll">10</span>)</button>
+          <button type="button" class="hub-tab-btn" data-category="speech">🗣️ Bật Âm &amp; Chậm Nói</button>
+          <button type="button" class="hub-tab-btn" data-category="asd">🧩 Phổ Tự Kỷ (ASD)</button>
+          <button type="button" class="hub-tab-btn" data-category="adhd">⚡ Tăng Động (ADHD)</button>
+          <button type="button" class="hub-tab-btn" data-category="sensory">🎨 Vận Động Tinh &amp; Cảm Giác</button>
+        </div>
+
+        <div class="hub-filter-controls">
+          <div class="hub-filter-select-wrap">
+            <label for="hubAgeFilter" class="hub-filter-label">Độ tuổi:</label>
+            <select id="hubAgeFilter" class="hub-filter-select">
+              <option value="all">Mọi độ tuổi (1.5 – 10 tuổi)</option>
+              <option value="toddler">1.5 – 3 tuổi (Giai đoạn vàng)</option>
+              <option value="preschool">3 – 6 tuổi (Mầm non &amp; Giác quan)</option>
+              <option value="school">6 – 10 tuổi (Tiểu học hòa nhập)</option>
+            </select>
+          </div>
+
+          <div class="hub-search-wrap">
+            <input type="text" id="hubSearchInput" class="hub-search-input" placeholder="Tìm bài tập (ví dụ: bong bóng, gương, đèn xanh...)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Exercise Cards Grid -->
+      <div class="exercise-hub-grid" id="exerciseHubGrid">
+        <!-- Rendered dynamically via script.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MỤC 3.3: GIAN HÀNG THƯƠNG HIỆU B2B & HỒ SƠ ĐƠN VỊ, BÁC SĨ CẦN THƠ
+       ========================================================================== -->
+  <section id="partners-directory" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Mạng Lưới Đối Tác Ninh Kiều - Cần Thơ</span>
+        <h2 class="section-title">Hồ Sơ Trung Tâm Can Thiệp, Trường Hòa Nhập &amp; Bác Sĩ Chuyên Khoa</h2>
+        <p class="section-subtitle">
+          100% cơ sở được thẩm định pháp lý hoạt động và đội ngũ chuyên gia có chứng chỉ hành nghề. Phụ huynh yên tâm trao gửi niềm tin với các đơn vị uy tín hàng đầu tại Cần Thơ.
+        </p>
+      </div>
+
+      <div class="partners-grid" id="partnersGrid">
+        <!-- 1. Ánh Sao -->
+        <div class="partner-card">
+          <div class="partner-card-header">
+            <div class="partner-badge-verified">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Đã kiểm duyệt Giấy phép Lớp 1</span>
+            </div>
+            <h4 class="partner-name">Trung tâm Can thiệp Sớm Ánh Sao Ninh Kiều</h4>
+            <span class="partner-type">Trung tâm Can thiệp Sớm &amp; Trị liệu Ngôn ngữ</span>
+          </div>
+          <div class="partner-card-body">
+            <div class="partner-info-row">
+              <span class="partner-info-icon">📍</span>
+              <span>Đường Nguyễn Văn Cừ nối dài, P. An Bình, Q. Ninh Kiều, Cần Thơ</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">👨‍⚕️</span>
+              <span>Cố vấn chuyên môn: <strong>ThS. Nguyễn Mai Anh</strong> (Giáo dục đặc biệt)</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">⏰</span>
+              <span>Giờ mở cửa: Thứ 2 – Thứ 7 (07:30 – 17:30)</span>
+            </div>
+            <div class="partner-tags-row">
+              <span class="partner-tag">Chậm nói</span>
+              <span class="partner-tag">Tự kỷ (ASD)</span>
+              <span class="partner-tag">Bật âm đơn</span>
+              <span class="partner-tag">Can thiệp 1-1</span>
+            </div>
+          </div>
+          <div class="partner-card-footer">
+            <button type="button" class="btn-partner-exercises" onclick="filterHubByCenter('Trung tâm Can thiệp Sớm Ánh Sao Ninh Kiều')">
+              📂 Xem bài tập của TT
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="openCenterBooking('Trung tâm Can thiệp Sớm Ánh Sao Ninh Kiều', 'Đường Nguyễn Văn Cừ nối dài, Q. Ninh Kiều, Cần Thơ')">
+              📅 Đặt lịch khám 1-1
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. PK Nhi Đồng -->
+        <div class="partner-card">
+          <div class="partner-card-header">
+            <div class="partner-badge-verified">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>CCHN Y tế Cần Thơ: 004812/CT-GPHN</span>
+            </div>
+            <h4 class="partner-name">Phòng khám Chuyên khoa Tâm lý Nhi Đồng Ninh Kiều</h4>
+            <span class="partner-type">Phòng khám Đánh giá Phát triển &amp; Sức khỏe Tâm thần Trẻ em</span>
+          </div>
+          <div class="partner-card-body">
+            <div class="partner-info-row">
+              <span class="partner-info-icon">📍</span>
+              <span>Đường Trần Hưng Đạo, P. An Phú, Q. Ninh Kiều, TP. Cần Thơ</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">🩺</span>
+              <span>Bác sĩ phụ trách: <strong>BS. CKI Lê Thanh Thảo</strong> (Bác sĩ Tâm lý Nhi khoa)</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">⏰</span>
+              <span>Lịch khám: Thứ 2 – Chủ Nhật (08:00 – 19:00)</span>
+            </div>
+            <div class="partner-tags-row">
+              <span class="partner-tag">Sàng lọc M-CHAT-R/F</span>
+              <span class="partner-tag">DSM-5 Chẩn đoán</span>
+              <span class="partner-tag">Điều hòa cảm giác</span>
+              <span class="partner-tag">Tư vấn gia đình</span>
+            </div>
+          </div>
+          <div class="partner-card-footer">
+            <button type="button" class="btn-partner-exercises" onclick="filterHubByCenter('Phòng khám Chuyên khoa Tâm lý Nhi Đồng Ninh Kiều')">
+              📂 Xem bài tập của TT
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="openCenterBooking('Phòng khám Chuyên khoa Tâm lý Nhi Đồng Ninh Kiều', 'Đường Trần Hưng Đạo, P. An Phú, Q. Ninh Kiều, TP. Cần Thơ')">
+              📅 Đặt lịch khám bác sĩ
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Từng Bước Nhỏ -->
+        <div class="partner-card">
+          <div class="partner-card-header">
+            <div class="partner-badge-verified">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Cấp phép Sở GD&amp;ĐT TP. Cần Thơ</span>
+            </div>
+            <h4 class="partner-name">Trung tâm Giáo dục Chuyên biệt Từng Bước Nhỏ</h4>
+            <span class="partner-type">Trung tâm Giáo dục Đặc biệt &amp; Hòa nhập</span>
+          </div>
+          <div class="partner-card-body">
+            <div class="partner-info-row">
+              <span class="partner-info-icon">📍</span>
+              <span>Đường Nguyễn Tri Phương, P. An Khánh, Q. Ninh Kiều, Cần Thơ</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">👨‍🏫</span>
+              <span>Chuyên gia can thiệp: <strong>ThS. Đỗ Hoàng Nam</strong> (Phương pháp ABA &amp; PECS)</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">⏰</span>
+              <span>Giờ mở cửa: Thứ 2 – Thứ 7 (07:30 – 17:00)</span>
+            </div>
+            <div class="partner-tags-row">
+              <span class="partner-tag">Tự kỷ (ASD)</span>
+              <span class="partner-tag">Giao tiếp PECS</span>
+              <span class="partner-tag">Phản xạ gọi tên</span>
+              <span class="partner-tag">Giáo dục đặc biệt</span>
+            </div>
+          </div>
+          <div class="partner-card-footer">
+            <button type="button" class="btn-partner-exercises" onclick="filterHubByCenter('Trung tâm Giáo dục Chuyên biệt Từng Bước Nhỏ')">
+              📂 Xem bài tập của TT
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="openCenterBooking('Trung tâm Giáo dục Chuyên biệt Từng Bước Nhỏ', 'Đường Nguyễn Tri Phương, P. An Khánh, Q. Ninh Kiều, Cần Thơ')">
+              📅 Đăng ký học 1-1
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Trường Tương Lai -->
+        <div class="partner-card">
+          <div class="partner-card-header">
+            <div class="partner-badge-verified">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Cơ sở công lập Sở GD&amp;ĐT TP. Cần Thơ</span>
+            </div>
+            <h4 class="partner-name">Trường Dạy Trẻ Khuyết Tật Tương Lai Cần Thơ</h4>
+            <span class="partner-type">Trường Chuyên biệt &amp; Hòa nhập Cộng đồng</span>
+          </div>
+          <div class="partner-card-body">
+            <div class="partner-info-row">
+              <span class="partner-info-icon">📍</span>
+              <span>Đường 30/4, P. Xuân Khánh, Q. Ninh Kiều, TP. Cần Thơ</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">👩‍🏫</span>
+              <span>Giáo viên phụ trách: <strong>Cô Lê Thị Kim Phượng</strong> (Cử nhân GDĐB)</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">⏰</span>
+              <span>Giờ mở cửa: Thứ 2 – Thứ 6 (07:00 – 16:30)</span>
+            </div>
+            <div class="partner-tags-row">
+              <span class="partner-tag">Kỹ năng sống</span>
+              <span class="partner-tag">Thẻ Flashcard</span>
+              <span class="partner-tag">Tiền tiểu học</span>
+              <span class="partner-tag">Tự lập tại nhà</span>
+            </div>
+          </div>
+          <div class="partner-card-footer">
+            <button type="button" class="btn-partner-exercises" onclick="filterHubByCenter('Trường Dạy Trẻ Khuyết Tật Tương Lai Cần Thơ')">
+              📂 Xem bài tập của TT
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="openCenterBooking('Trường Dạy Trẻ Khuyết Tật Tương Lai Cần Thơ', 'Đường 30/4, P. Xuân Khánh, Q. Ninh Kiều, TP. Cần Thơ')">
+              📅 Đăng ký tham quan &amp; học
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. Rồng Việt Cần Thơ -->
+        <div class="partner-card">
+          <div class="partner-card-header">
+            <div class="partner-badge-verified">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Hệ thống Can thiệp &amp; Kỹ năng Đã Thẩm Định</span>
+            </div>
+            <h4 class="partner-name">Trung tâm Đào tạo Kỹ năng &amp; Can thiệp Rồng Việt</h4>
+            <span class="partner-type">Trung tâm Trị liệu Hành vi &amp; Kỹ năng Tập trung</span>
+          </div>
+          <div class="partner-card-body">
+            <div class="partner-info-row">
+              <span class="partner-info-icon">📍</span>
+              <span>Đường Trần Văn Hoài, P. Xuân Khánh, Q. Ninh Kiều, Cần Thơ</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">👨‍💼</span>
+              <span>Chuyên gia phụ trách: <strong>ThS. Nguyễn Trọng Nhân</strong> (Tâm lý học đường)</span>
+            </div>
+            <div class="partner-info-row">
+              <span class="partner-info-icon">⏰</span>
+              <span>Giờ mở cửa: Thứ 2 – Chủ Nhật (08:00 – 18:00)</span>
+            </div>
+            <div class="partner-tags-row">
+              <span class="partner-tag">Tăng động (ADHD)</span>
+              <span class="partner-tag">Ức chế bộc phát</span>
+              <span class="partner-tag">Rèn luyện tập trung</span>
+              <span class="partner-tag">Kỷ luật tích cực</span>
+            </div>
+          </div>
+          <div class="partner-card-footer">
+            <button type="button" class="btn-partner-exercises" onclick="filterHubByCenter('Trung tâm Đào tạo Kỹ năng & Can thiệp Rồng Việt Cần Thơ')">
+              📂 Xem bài tập của TT
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="openCenterBooking('Trung tâm Đào tạo Kỹ năng & Can thiệp Rồng Việt Cần Thơ', 'Đường Trần Văn Hoài, P. Xuân Khánh, Q. Ninh Kiều, Cần Thơ')">
+              📅 Đăng ký đánh giá 1-1
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="data-moderation" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Chuẩn Chuyên Môn &amp; Pháp Lý</span>
+        <h2 class="section-title">Nguồn Dữ Liệu Thực Địa &amp; Quy Trình Kiểm Duyệt 2 Lớp</h2>
+        <p class="section-subtitle">
+          EduTrace AI cam kết tính khoa học và an toàn tuyệt đối cho trẻ. Toàn bộ kho bài tập và trung tâm liên kết
+          đều phải vượt qua quy trình kiểm soát nghiêm ngặt 2 tầng trước khi hiển thị cho phụ huynh.
+        </p>
+      </div>
+
+      <!-- Data Source Cards -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+        <div class="pilot-stat-box" style="text-align: left; background: white; border-radius: 12px; padding: 22px;">
+          <div style="font-size: 1.8rem; margin-bottom: 8px;">📊</div>
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Cơ Sở Dịch Tễ Thực Địa
+          </h4>
+          <p style="font-size: 0.86rem; color: #64748b; line-height: 1.5;">
+            Dựa trên khảo sát thực tế <strong>80 mẫu tại Cần Thơ</strong>, kết hợp dữ liệu thống kê <strong>313.633
+              trẻ</strong> (1,5 - 10 tuổi)
+            của Sở GD&amp;ĐT TP. Cần Thơ và tỷ lệ ASD (1,2% – 1,9%) từ Bộ Y tế.
+          </p>
+        </div>
+
+        <div class="pilot-stat-box" style="text-align: left; background: white; border-radius: 12px; padding: 22px;">
+          <div style="font-size: 1.8rem; margin-bottom: 8px;">🏥</div>
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Bài Tập Từ Trung Tâm B2B
+          </h4>
+          <p style="font-size: 0.86rem; color: #64748b; line-height: 1.5;">
+            Các trung tâm can thiệp và trường mầm non hòa nhập đối tác tự thiết kế và đăng tải video dài 3 - 5 phút nhằm
+            chứng minh năng lực chuyên môn và phương pháp giáo dục thực tế.
+          </p>
+        </div>
+
+        <div class="pilot-stat-box" style="text-align: left; background: white; border-radius: 12px; padding: 22px;">
+          <div style="font-size: 1.8rem; margin-bottom: 8px;">🩺</div>
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Kho Chuẩn M-CHAT-R/F
+          </h4>
+          <p style="font-size: 0.86rem; color: #64748b; line-height: 1.5;">
+            Nhóm tự sản xuất kho bài tập mẫu dưới sự cố vấn trực tiếp từ chuyên gia, bác sĩ tâm lý trẻ em tại các bệnh
+            viện,
+            phòng khám tư nhân dựa trên bảng kiểm M-CHAT-R/F chuẩn quốc tế.
+          </p>
+        </div>
+      </div>
+
+      <!-- 2-Layer Moderation Grid -->
+      <div class="moderation-grid">
+        <!-- Layer 1 -->
+        <div class="moderation-card">
+          <span class="layer-badge layer-1-badge">🛡️ LỚP 1: DUYỆT HỒ SƠ ĐƠN VỊ</span>
+          <h3>Kiểm Tra Tính Pháp Lý &amp; Chứng Chỉ Hành Nghề</h3>
+          <p class="mod-desc">
+            Chỉ cấp quyền mở gian hàng và đăng tải bài tập cho các cơ sở hoặc chuyên gia có đầy đủ tư cách pháp nhân hợp
+            pháp,
+            loại bỏ hoàn toàn các trung tâm "chui" kém chất lượng.
+          </p>
+          <ul class="mod-checklist">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Giấy phép hoạt động giáo dục đặc biệt / y tế được cơ quan nhà nước cấp phép.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Chứng chỉ hành nghề, bằng cấp chuyên ngành GDĐB / Tâm lý học đường của đội ngũ giáo viên.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Xác minh địa chỉ cơ sở vật chất thực tế trên địa bàn Quận Ninh Kiều và các tỉnh ĐBSCL.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Layer 2 -->
+        <div class="moderation-card">
+          <span class="layer-badge layer-2-badge">🎬 LỚP 2: KIỂM DUYỆT BÀI VIẾT &amp; VIDEO</span>
+          <h3>Kiểm Định Chuẩn Chuyên Môn &amp; Thời Lượng 3 – 5 Phút</h3>
+          <p class="mod-desc">
+            Hội đồng chuyên môn của dự án cùng bác sĩ cố vấn xem xét từng video bài tập trước khi đưa lên hệ thống,
+            đảm bảo tính thực tiễn cao và phù hợp để phụ huynh tự tập tại nhà.
+          </p>
+          <ul class="mod-checklist">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Đảm bảo chuẩn chuyên môn khoa học, tuyệt đối không chứa phương pháp phản khoa học hay mê tín.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Hình ảnh thân thiện, âm thanh rõ ràng, động tác giáo viên chuẩn xác, dễ bắt chước.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Thời lượng chuẩn từ 3 đến 5 phút, đính kèm checklist lưu ý an toàn và nút kết nối với trung
+                tâm.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+
+
+  <!-- ==========================================================================
+       PRICING SECTION (BẢNG GIÁ THEO PROPOSAL)
+       ========================================================================== -->
+  <section id="pricing" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Bảng Giá Minh Bạch</span>
+        <h2 class="section-title">Lựa Chọn Gói Phù Hợp Cho Gia Đình &amp; Trung Tâm Đối Tác</h2>
+        <p class="section-subtitle">
+          Mức phí tối ưu, cam kết đồng hành dài hạn và loại bỏ mọi rào cản chi phí ban đầu cho cha mẹ.
+        </p>
+      </div>
+
+      <!-- Pricing Switcher -->
+      <div class="pricing-switch-wrap">
+        <span class="switch-label active" id="labelMonthly">Thanh Toán Theo Tháng</span>
+        <div class="toggle-btn" id="pricingToggle">
+          <span class="toggle-slider"></span>
+        </div>
+        <span class="switch-label" id="labelYearly">
+          Thanh Toán Theo Năm
+          <span class="discount-badge">Tiết kiệm 20%</span>
+        </span>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Plan 1: Weekly Trial -->
+        <div class="pricing-card">
+          <h3 class="pricing-plan-name">Gói Tuần Trải Nghiệm</h3>
+          <p class="pricing-plan-desc">Dành cho phụ huynh muốn làm quen với Trợ lý AI và bài tập thực hành.</p>
+          <div class="pricing-price-wrap">
+            <span class="price-num">49.000₫</span>
+            <span class="price-unit">/tuần trải nghiệm</span>
+          </div>
+          <ul class="pricing-features">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Trợ lý AI tư vấn trong 7 ngày</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> 5 video bài tập 3-5 phút cơ bản</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Hướng dẫn tự tập tại nhà</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Đặt lịch tư vấn với trung tâm</li>
+          </ul>
+          <a href="#contact" class="btn btn-outline-light" style="color: #0f172a; border-color: #cbd5e1;">Bắt Đầu Trải
+            Nghiệm</a>
+        </div>
+
+        <!-- Plan 2: Standard Monthly (Bestseller) -->
+        <div class="pricing-card popular">
+          <span class="popular-ribbon">Phụ Huynh Chọn Nhiều Nhất</span>
+          <h3 class="pricing-plan-name">Gói Tháng Tiêu Chuẩn</h3>
+          <p class="pricing-plan-desc">Mô hình chuẩn B2C theo đề xuất dự án, mở khóa lộ trình can thiệp toàn diện.</p>
+          <div class="pricing-price-wrap">
+            <span class="price-num" id="priceStandard">199.000₫</span>
+            <span class="price-unit" id="unitStandard">/tháng (hủy bất kỳ lúc nào)</span>
+          </div>
+          <ul class="pricing-features">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> <strong>Không giới hạn Trợ lý AI tư vấn</strong></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Toàn bộ kho video 3 – 5 phút đối tác</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Kiểm duyệt 2 lớp chuẩn M-CHAT-R/F</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Kênh hỏi đáp trực tiếp với giáo viên</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Ưu tiên lịch can thiệp 1-1 tại cơ sở</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary">Đăng Ký Gói Tháng</a>
+        </div>
+
+        <!-- Plan 3: Yearly B2C -->
+        <div class="pricing-card">
+          <h3 class="pricing-plan-name">Gói Năm Toàn Diện</h3>
+          <p class="pricing-plan-desc">Tiết kiệm 20% chi phí, đồng hành xuyên suốt tiến trình phát triển của con.</p>
+          <div class="pricing-price-wrap">
+            <span class="price-num">1.890.000₫</span>
+            <span class="price-unit">/năm (~157.000₫/tháng)</span>
+          </div>
+          <ul class="pricing-features">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Toàn bộ tính năng gói Tháng</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Cập nhật video bài tập mới liên tục</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> <strong>Tặng 2 buổi tham vấn 1-1 với Bác sĩ</strong></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Hỗ trợ đánh giá tiến độ định kỳ</li>
+          </ul>
+          <a href="#contact" class="btn btn-outline-light" style="color: #0f172a; border-color: #cbd5e1;">Đăng Ký Gói
+            Năm</a>
+        </div>
+
+        <!-- Plan 4: B2B Enterprise Partner -->
+        <div class="pricing-card" style="background: #0f172a; color: white; border-color: #38bdf8;">
+          <h3 class="pricing-plan-name" style="color: white;">Gian Hàng B2B Trung Tâm</h3>
+          <p class="pricing-plan-desc" style="color: #94a3b8;">Dành cho Trung tâm Can thiệp, Trường Mầm non hòa nhập.
+          </p>
+          <div class="pricing-price-wrap" style="border-color: rgba(255,255,255,0.1);">
+            <span class="price-num" id="priceEnterprise" style="color: #38bdf8;">2.000.000₫</span>
+            <span class="price-unit" id="unitEnterprise" style="color: #94a3b8;">/tháng /Trung tâm</span>
+          </div>
+          <ul class="pricing-features">
+            <li style="color: #e2e8f0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8"
+                stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> <strong>Sở hữu Gian hàng thương hiệu B2B</strong></li>
+            <li style="color: #e2e8f0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8"
+                stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Đăng tải bài tập video không giới hạn</li>
+            <li style="color: #e2e8f0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8"
+                stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Được AI tự động đối soát gợi ý phụ huynh</li>
+            <li style="color: #e2e8f0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8"
+                stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Hỗ trợ quay dựng video 3 phút miễn phí</li>
+            <li style="color: #e2e8f0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8"
+                stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Nhận phễu học viên đăng ký can thiệp 1-1</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary" style="box-shadow: 0 4px 15px rgba(6,182,212,0.4);">Hợp Tác B2B
+            Ngay</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MỤC 7: LỢI THẾ CẠNH TRANH CỐT LÕI
+       ========================================================================== -->
+  <section id="competitive-edge" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Năng Lực Cốt Lõi</span>
+        <h2 class="section-title">3 Lợi Thế Cạnh Tranh Cốt Lõi Của EduTrace AI</h2>
+        <p class="section-subtitle">
+          Giản lược công nghệ, tập trung giải quyết đúng điểm đau và tạo dựng phễu chuyển đổi trao giá trị trước.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+        <div class="ps-card" style="border-top: 4px solid #10b981;">
+          <div style="font-size: 2rem; margin-bottom: 12px;">👌</div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Dễ Sử Dụng &amp; Không
+            Rào Cản Công Nghệ</h3>
+          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6;">
+            Phụ huynh chỉ cần tương tác nhẹ nhàng với trợ lý AI và xem video bài tập thực hành 3 – 5 phút.
+            <strong>Không cần sự can thiệp của camera giám sát</strong> hay thuật toán nhận diện khuôn mặt phức tạp gây
+            e ngại về quyền riêng tư.
+          </p>
+        </div>
+
+        <div class="ps-card" style="border-top: 4px solid #2563eb;">
+          <div style="font-size: 2rem; margin-bottom: 12px;">🧠</div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Trợ Lý AI Tư Vấn Cá
+            Nhân Hóa</h3>
+          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6;">
+            Giải quyết triệt để sự mơ hồ và bối rối của cha mẹ. Thay vì đọc hàng trăm bài viết tràn lan trên mạng,
+            AI tự động bóc tách mô tả thực tế để đối soát và đưa ra bài tập trúng đích từ các chuyên gia.
+          </p>
+        </div>
+
+        <div class="ps-card" style="border-top: 4px solid #f59e0b;">
+          <div style="font-size: 2rem; margin-bottom: 12px;">🎁</div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Mô Hình Tuyển Sinh
+            Value-First</h3>
+          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.6;">
+            Mô hình thu hút học viên bằng việc <strong>trao giá trị trước</strong> (cho phụ huynh tập thử tại nhà) thay
+            vì chạy quảng cáo suông.
+            Tăng niềm tin vững chắc cho phụ huynh và tối ưu chi phí tuyển sinh cho các trung tâm.
+          </p>
+        </div>
+      </div>
+
+      <!-- Comparison Matrix -->
+      <div style="margin-top: 40px;">
+        <div class="table-responsive">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Tiêu Chí So Sánh</th>
+                <th>Trung Tâm Can Thiệp Truyền Thống</th>
+                <th>Phần Mềm Nước Ngoài</th>
+                <th class="highlight-col">Nền Tảng EduTrace AI (Value-First)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Mô hình tiếp cận</strong></td>
+                <td>Chạy quảng cáo tuyển sinh trực tiếp</td>
+                <td>Bán lẻ B2C trực tuyến độc lập</td>
+                <td class="highlight-col"><strong>Phễu Value-First (Trao bài tập trước -> Can thiệp 1-1)</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Rào cản công nghệ</strong></td>
+                <td>Ghi chép sổ tay truyền thống</td>
+                <td>Giao diện tiếng Anh, thuật toán phức tạp</td>
+                <td class="highlight-col"><span class="badge-check">✓</span> <strong>Cực kỳ dễ dùng, không cần camera
+                    giám sát</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Chi phí trải nghiệm</strong></td>
+                <td>4.000.000 – 6.000.000 VNĐ/tháng</td>
+                <td>Thanh toán USD đắt đỏ</td>
+                <td class="highlight-col"><span class="badge-check">✓</span> <strong>Chỉ 199.000 VNĐ/tháng để tập thử
+                    tại nhà</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Kiểm duyệt bài tập</strong></td>
+                <td>Tùy thuộc giáo viên từng trung tâm</td>
+                <td>Không tối ưu theo văn hóa &amp; y tế VN</td>
+                <td class="highlight-col"><span class="badge-check">✓</span> <strong>Kiểm duyệt 2 lớp (Pháp lý + Chuẩn
+                    M-CHAT-R/F)</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Kết nối can thiệp 1-1</strong></td>
+                <td>Phụ huynh phải tự tìm hiểu từng nơi</td>
+                <td>Không có mạng lưới liên kết tại Việt Nam</td>
+                <td class="highlight-col"><span class="badge-check">✓</span> <strong>1-Click kết nối trực tiếp với trung
+                    tâm tại Ninh Kiều</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==========================================================================
+       MỤC 9: KẾT LUẬN & KÊU GỌI HÀNH ĐỘNG
+       ========================================================================== -->
+  <section class="section" style="background: linear-gradient(135deg, #0a192f 0%, #0f172a 100%); color: white;">
+    <div class="container" style="text-align: center; max-width: 900px;">
+      <span class="section-tag"
+        style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3);">
+        Kết Luận Bản Đề Xuất
+      </span>
+      <h2 style="font-size: 2.2rem; font-weight: 800; margin-top: 14px; margin-bottom: 20px; line-height: 1.35;">
+        Dự Án Khả Thi Cao, Nhẹ Nhàng Về Kỹ Thuật Nhưng Mang Lại Hiệu Quả Thương Mại &amp; Xã Hội Lớn
+      </h2>
+      <p style="font-size: 1.05rem; color: #cbd5e1; line-height: 1.7; margin-bottom: 32px;">
+        Bằng việc giản lược công nghệ và tập trung vào <strong>bài tập thực hành bình thường kết hợp trợ lý AI tư
+          vấn</strong>,
+        EduTrace AI vừa giải quyết bài toán tuyển sinh hiệu quả cho trung tâm, vừa giúp phụ huynh chủ động đồng hành
+        cùng con
+        và tự tin chọn đúng nơi can thiệp uy tín.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+        <a href="#ai-assistant-demo" class="btn btn-primary" style="padding: 14px 28px; font-size: 1rem;">
+          Thử Nghiệm Trợ Lý AI Ngay
+        </a>
+        <a href="#contact" class="btn btn-outline-light" style="padding: 14px 28px; font-size: 1rem;">
+          Đăng Ký Tư Vấn &amp; Hợp Tác
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       CONSULTATION & WAITLIST FORM
+       ========================================================================== -->
+  <section id="contact" class="section section-alt">
+    <div class="container">
+      <div class="contact-grid">
+        <!-- Contact Info Side -->
+        <div class="contact-info-side">
+          <span class="section-tag" style="margin-bottom: 10px;">Kết Nối Dự Án</span>
+          <h3>Đồng Hành Cùng EduTrace AI</h3>
+          <p>
+            Bạn là phụ huynh cần bài tập hướng dẫn rèn luyện cùng con tại nhà, hay đại diện Trung tâm can thiệp muốn mở
+            Gian hàng thương hiệu B2B để tiếp cận phụ huynh? Hãy để lại thông tin để chúng tôi liên hệ tư vấn chuyên
+            sâu.
+          </p>
+
+          <div class="contact-details-list">
+            <div class="contact-detail-item">
+              <div class="cd-icon">📍</div>
+              <div class="cd-text">
+                <h5>Địa bàn nghiên cứu &amp; thí điểm</h5>
+                <p>Khu Đại học FPT Cần Thơ, Đường Nguyễn Văn Cừ nối dài, Phường An Bình, Quận Ninh Kiều, TP. Cần Thơ</p>
+              </div>
+            </div>
+
+            <div class="contact-detail-item">
+              <div class="cd-icon">✉️</div>
+              <div class="cd-text">
+                <h5>Email liên hệ chính thức</h5>
+                <a href="mailto:edutrace.ai.assistant@gmail.com">edutrace.ai.assistant@gmail.com</a>
+              </div>
+            </div>
+
+            <div class="contact-detail-item">
+              <div class="cd-icon">🌐</div>
+              <div class="cd-text">
+                <h5>Fanpage truyền thông chính thức</h5>
+                <a href="https://www.facebook.com/edutrace.ai.official" target="_blank"
+                  rel="noopener noreferrer">facebook.com/edutrace.ai.official</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Side -->
+        <div class="contact-form-side">
+          <form id="consultationForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Họ và tên của bạn *</label>
+                <input type="text" name="fullname" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số điện thoại liên hệ *</label>
+                <input type="tel" name="phone" class="form-control" placeholder="Ví dụ: 0912 345 678" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="name@example.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bạn là ai? *</label>
+                <select name="role" class="form-control" required>
+                  <option value="parent">Phụ huynh có con cần can thiệp (1.5 – 10 tuổi)</option>
+                  <option value="center">Đại diện Trung tâm can thiệp / Trường Mầm non (Đăng ký B2B)</option>
+                  <option value="doctor">Bác sĩ Nhi khoa / Chuyên gia Tâm lý cố vấn</option>
+                  <option value="investor">Nhà đầu tư / Đối tác hỗ trợ dự án</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Nhu cầu hoặc tình trạng trẻ cần hỗ trợ</label>
+              <textarea name="notes" class="form-control" rows="4"
+                placeholder="Chia sẻ độ tuổi của trẻ, biểu hiện chậm nói, tự kỷ, tăng động hoặc câu hỏi về gian hàng đối tác B2B..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              Gửi Thông Tin Đăng Ký Tư Vấn
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MODAL 1: CHI TIẾT BÀI TẬP & VIDEO PLAYER SIMULATION
+       ========================================================================== -->
+  <div class="modal-backdrop" id="exerciseModal">
+    <div class="exercise-modal-box">
+      <!-- Simulated Video Player Header -->
+      <div class="exercise-modal-video">
+        <img src="images/banner.jpg" alt="Video Player" class="exercise-modal-video-bg">
+        <div class="exercise-modal-video-ui">
+          <div
+            style="width: 60px; height: 60px; background: rgba(37,99,235,0.9); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,0,0,0.6);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </div>
+          <h4 id="modalExTitle" style="font-size: 1.15rem; font-weight: 700; color: white; margin-bottom: 6px;">Tiêu đề
+            bài tập</h4>
+          <span style="font-size: 0.8rem; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 20px;"
+            id="modalExDuration">⏱️ 3 phút 45 giây</span>
+        </div>
+        <button class="modal-close" id="closeExerciseModal" aria-label="Đóng"
+          style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.5); color: white; border-radius: 50%; width: 36px; height: 36px;">&times;</button>
+      </div>
+
+      <!-- Exercise Body -->
+      <div class="exercise-modal-body">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <span style="font-size: 0.78rem; color: #64748b;">Đơn vị cung cấp bài tập:</span>
+            <strong style="color: #2563eb; display: block;" id="modalExCenter">Tên trung tâm</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.78rem; color: #64748b;">Chuyên viên hướng dẫn:</span>
+            <strong style="color: #0f172a; display: block;" id="modalExInstructor">Tên giáo viên</strong>
+          </div>
+        </div>
+
+        <p id="modalExDesc" style="font-size: 0.9rem; color: #475569; line-height: 1.6; margin-bottom: 16px;"></p>
+
+        <div
+          style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;">
+          <strong style="font-size: 0.85rem; color: #0f172a;">Giáo cụ cần chuẩn bị tại nhà:</strong>
+          <span style="font-size: 0.85rem; color: #64748b; margin-left: 6px;" id="modalExMaterials"></span>
+        </div>
+
+        <h5 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">Các Bước Thực Hành Cùng
+          Con Tại Nhà:</h5>
+        <div class="exercise-step-timeline" id="modalExStepsTimeline">
+          <!-- Populated via script.js -->
+        </div>
+
+        <div
+          style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 18px;">
+          <strong style="color: #b45309; font-size: 0.86rem;">Lưu ý chuyên môn an toàn:</strong>
+          <p id="modalExSafety" style="font-size: 0.84rem; color: #78350f; margin-top: 4px;"></p>
+        </div>
+
+        <!-- Funnel Conversion Button -->
+        <div
+          style="margin-top: 24px; padding-top: 18px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="font-size: 0.84rem; color: #64748b;">
+            💡 Con đáp ứng tốt với phương pháp này?
+          </div>
+          <button class="btn btn-primary" id="modalConvertBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+            Đăng Ký Đưa Con Đến Khám &amp; Học 1-1 Tại Trung Tâm Này
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 2: ĐĂNG KÝ CAN THIỆP TRỰC TIẾP 1-1 TẠI TRUNG TÂM (VALUE-FIRST FUNNEL)
+       ========================================================================== -->
+  <div class="modal-backdrop" id="centerBookingModal">
+    <div class="modal-box" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          Đăng Ký Khám &amp; Can Thiệp Trực Tiếp 1-1
+        </h3>
+        <button class="modal-close" id="closeCenterBookingModal" aria-label="Đóng">&times;</button>
+      </div>
+
+      <div style="padding: 24px;">
+        <div
+          style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+          <span style="font-size: 0.78rem; color: #1e40af; font-weight: 700;">TRUNG TÂM ĐỐI TÁC TIẾP NHẬN:</span>
+          <h4 style="font-size: 1.05rem; color: #1e3a8a; margin: 4px 0;" id="bookingCenterDisplay">Trung tâm Ánh Sao
+            Ninh Kiều</h4>
+          <p style="font-size: 0.8rem; color: #64748b;" id="bookingAddressDisplay">Quận Ninh Kiều, TP. Cần Thơ</p>
+        </div>
+
+        <form id="centerBookingForm">
+          <input type="hidden" name="targetCenter" id="bookingTargetCenter" value="">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Họ tên phụ huynh *</label>
+              <input type="text" name="parentName" class="form-control" placeholder="Ví dụ: Lê Thị Mai" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Số điện thoại Zalo *</label>
+              <input type="tel" name="parentPhone" class="form-control" placeholder="0912 345 678" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tên và độ tuổi của bé *</label>
+              <input type="text" name="childInfo" class="form-control" placeholder="Ví dụ: Bé Bo, 2.5 tuổi" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Thời gian mong muốn khám thử *</label>
+              <select name="preferredSchedule" class="form-control" required>
+                <option value="weekend">Thứ 7 hoặc Chủ Nhật tuần này</option>
+                <option value="weekday_morning">Các buổi sáng trong tuần</option>
+                <option value="weekday_afternoon">Các buổi chiều trong tuần</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mô tả phản hồi của bé sau khi tập bài tập tại nhà</label>
+            <textarea name="trialFeedback" class="form-control" rows="3"
+              placeholder="Ví dụ: Bé đã chịu nhìn vào mắt mẹ khi chơi ú òa, nhưng vẫn chưa bật âm rõ..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
+            Xác Nhận Đặt Lịch Hẹn Tại Trung Tâm
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 3: XÁC THỰC NGƯỜI DÙNG (ĐĂNG NHẬP / ĐĂNG KÝ / QUÊN MẬT KHẨU)
+       ========================================================================== -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="auth-modal-card">
+      <div class="auth-modal-header">
+        <div class="auth-header-title">
+          <div class="auth-brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>EduTrace AI</h3>
+            <p>Xác thực &amp; Quản lý dữ liệu can thiệp</p>
+          </div>
+        </div>
+        <button class="modal-close" id="closeAuthModal" aria-label="Đóng">&times;</button>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="auth-tabs" id="authTabsBar">
+        <button type="button" class="auth-tab-btn active" id="authTabLogin">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          Đăng Nhập
+        </button>
+        <button type="button" class="auth-tab-btn" id="authTabRegister">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          Đăng Ký
+        </button>
+      </div>
+
+      <div class="auth-body">
+        <!-- 1. LOGIN PANEL -->
+        <div id="authPanelLogin">
+          <!-- Quick Demo Accounts -->
+          <div class="demo-accounts-box">
+            <div class="demo-accounts-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Thử nhanh tài khoản mẫu (Click để tự điền):</span>
+            </div>
+            <div class="demo-chips-list">
+              <button type="button" class="demo-account-chip" data-email="admin@edutrace.vn" style="border-color: #38bdf8; color: #0284c7; background: #f0f9ff;">
+                🛡️ Quản trị (Admin)
+              </button>
+              <button type="button" class="demo-account-chip" data-email="demo.parent@edutrace.vn">
+                👨‍👩‍👧 Phụ huynh (Chị Mai)
+              </button>
+              <button type="button" class="demo-account-chip" data-email="demo.center@edutrace.vn">
+                🏫 Trung tâm Ánh Sao
+              </button>
+              <button type="button" class="demo-account-chip" data-email="demo.doctor@edutrace.vn">
+                🩺 ThS. Mai Anh
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-alert auth-alert-danger" id="loginErrorMessage"></div>
+
+          <form id="formLogin">
+            <div class="form-group">
+              <label class="form-label">Email tài khoản</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </span>
+                <input type="email" id="loginEmail" class="form-control" placeholder="name@example.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">Mật khẩu</label>
+                <a href="#" id="btnToForgot" style="font-size: 0.76rem; color: #2563eb; font-weight: 600;">Quên mật khẩu?</a>
+              </div>
+              <div class="input-with-icon">
+                <span class="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </span>
+                <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                <button type="button" class="password-toggle-btn" data-target="loginPassword" aria-label="Hiện/ẩn mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="loginSubmitBtn" style="width: 100%; padding: 12px; margin-top: 6px;">
+              Đăng Nhập
+            </button>
+          </form>
+
+          <div class="auth-divider">
+            <span>hoặc</span>
+          </div>
+
+          <button type="button" class="btn-google" id="btnGoogleLogin">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.87c2.26-2.09 3.67-5.17 3.67-9.15z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.87-3.05c-1.08.72-2.45 1.16-4.06 1.16-3.13 0-5.78-2.11-6.73-4.96H1.28v3.15C3.26 21.36 7.34 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.61H1.28C.46 8.23 0 10.06 0 12s.46 3.77 1.28 5.39l3.99-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.28 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/>
+            </svg>
+            <span>Tiếp tục với Google</span>
+          </button>
+        </div>
+
+        <!-- 2. REGISTER PANEL -->
+        <div id="authPanelRegister" style="display: none;">
+          <div class="auth-alert auth-alert-danger" id="registerErrorMessage"></div>
+
+          <form id="formRegister">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Họ và tên *</label>
+                <input type="text" id="regFullName" class="form-control" placeholder="Ví dụ: Lê Thị Mai" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số điện thoại *</label>
+                <input type="tel" id="regPhone" class="form-control" placeholder="0912 345 678" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Email tài khoản *</label>
+                <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bạn là ai? *</label>
+                <select id="regRole" class="form-control" required>
+                  <option value="parent">Phụ huynh (Có con cần can thiệp)</option>
+                  <option value="center">Trung tâm / Cơ sở can thiệp sớm</option>
+                  <option value="doctor">Chuyên viên / Bác sĩ can thiệp</option>
+                  <option value="investor">Nhà đầu tư / Đối tác đề án</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mật khẩu *</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </span>
+                <input type="password" id="regPassword" class="form-control" placeholder="Tối thiểu 6 ký tự" required>
+                <button type="button" class="password-toggle-btn" data-target="regPassword" aria-label="Hiện/ẩn mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <!-- Strength meter -->
+              <div class="strength-meter-wrap">
+                <div class="strength-bar-track">
+                  <div class="strength-bar" id="passwordStrengthBar"></div>
+                </div>
+                <div class="strength-text" id="passwordStrengthText"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Xác nhận lại mật khẩu *</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                </span>
+                <input type="password" id="regConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu trên" required>
+                <button type="button" class="password-toggle-btn" data-target="regConfirmPassword" aria-label="Hiện/ẩn mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.78rem; color: #475569; cursor: pointer;">
+                <input type="checkbox" id="regAgreeTerms" required style="margin-top: 3px;">
+                <span>Tôi đồng ý với Quy chế hoạt động và cam kết bảo vệ dữ liệu sức khỏe trẻ em của EduTrace AI.</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="registerSubmitBtn" style="width: 100%; padding: 12px;">
+              Đăng Ký Tài Khoản
+            </button>
+          </form>
+
+          <div class="auth-divider">
+            <span>hoặc</span>
+          </div>
+
+          <button type="button" class="btn-google" id="btnGoogleRegister">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.87c2.26-2.09 3.67-5.17 3.67-9.15z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.87-3.05c-1.08.72-2.45 1.16-4.06 1.16-3.13 0-5.78-2.11-6.73-4.96H1.28v3.15C3.26 21.36 7.34 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.61H1.28C.46 8.23 0 10.06 0 12s.46 3.77 1.28 5.39l3.99-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.28 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/>
+            </svg>
+            <span>Đăng ký nhanh với Google</span>
+          </button>
+        </div>
+
+        <!-- 3. FORGOT PASSWORD PANEL -->
+        <div id="authPanelForgot" style="display: none;">
+          <div style="text-align: center; margin-bottom: 18px;">
+            <div style="width: 48px; height: 48px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: #2563eb;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h4 style="font-size: 1.1rem; color: #0f172a; font-weight: 700;">Quên Mật Khẩu?</h4>
+            <p style="font-size: 0.82rem; color: #64748b; margin-top: 4px;">
+              Nhập email tài khoản của bạn. Hệ thống sẽ gửi thư xác thực chứa liên kết đặt lại mật khẩu an toàn.
+            </p>
+          </div>
+
+          <div class="auth-alert auth-alert-danger" id="forgotErrorMessage"></div>
+          <div class="auth-alert auth-alert-success" id="forgotSuccessMessage"></div>
+
+          <form id="formForgot">
+            <div class="form-group">
+              <label class="form-label">Email đã đăng ký</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </span>
+                <input type="email" id="forgotEmail" class="form-control" placeholder="name@example.com" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="forgotSubmitBtn" style="width: 100%; padding: 12px;">
+              Gửi Liên Kết Đặt Lại Mật Khẩu
+            </button>
+          </form>
+
+          <div style="text-align: center; margin-top: 16px;">
+            <a href="#" id="btnBackToLogin" style="font-size: 0.84rem; color: #2563eb; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              Quay lại đăng nhập
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 4: HỒ SƠ TÀI KHOẢN & LỊCH HẸN / YÊU CẦU CỦA NGƯỜI DÙNG
+       ========================================================================== -->
+  <div class="modal-backdrop" id="userProfileModal">
+    <div class="profile-modal-card">
+      <div class="profile-card-header">
+        <h3 style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Quản Lý Hồ Sơ &amp; Hoạt Động
+        </h3>
+        <button class="modal-close" id="closeProfileModal" aria-label="Đóng">&times;</button>
+      </div>
+
+      <!-- Hero Header -->
+      <div class="profile-hero-section">
+        <div class="profile-avatar-big" id="profileAvatarBig">U</div>
+        <div class="profile-hero-info">
+          <h4 id="profileHeroName">Người dùng EduTrace</h4>
+          <p>Thành viên từ: <span id="profileCreatedAt">10/10/2026</span></p>
+        </div>
+      </div>
+
+      <!-- Profile Tabs -->
+      <div class="profile-tabs">
+        <button type="button" class="profile-tab-btn active" id="profileTabInfo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Thông Tin Cá Nhân
+        </button>
+        <button type="button" class="profile-tab-btn" id="profileTabBookings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Yêu Cầu &amp; Lịch Hẹn Đã Gửi
+        </button>
+      </div>
+
+      <!-- Tab Content 1: User Info Edit -->
+      <div class="profile-modal-body" id="profilePanelInfo">
+        <form id="formEditProfile">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Họ và tên</label>
+              <input type="text" id="profileEditName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Số điện thoại</label>
+              <input type="tel" id="profileEditPhone" class="form-control" placeholder="0912 345 678">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email tài khoản (Chỉ đọc)</label>
+              <input type="email" id="profileEditEmail" class="form-control" readonly style="background: #f1f5f9; cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vai trò trên nền tảng</label>
+              <select id="profileEditRole" class="form-control">
+                <option value="parent">Phụ huynh có con cần can thiệp</option>
+                <option value="center">Trung tâm can thiệp sớm / Cơ sở giáo dục</option>
+                <option value="doctor">Chuyên viên / Bác sĩ can thiệp</option>
+                <option value="investor">Nhà đầu tư / Đối tác đề án</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="profileSubmitBtn" style="padding: 10px 24px; margin-top: 10px;">
+            Lưu Thay Đổi Thông Tin
+          </button>
+        </form>
+      </div>
+
+      <!-- Tab Content 2: Bookings History -->
+      <div class="profile-modal-body" id="profilePanelBookings" style="display: none;">
+        <div id="userActivitiesList">
+          <!-- Populated dynamically via auth-ui.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Brand Col -->
+        <div class="footer-brand">
+          <h4>EduTrace AI</h4>
+          <p>
+            Nền tảng trực tuyến ứng dụng Trí tuệ Nhân tạo kết nối Trung tâm can thiệp và Phụ huynh có con mắc hội chứng
+            tự kỷ (ASD), tăng động giảm chú ý (ADHD) và chậm nói theo cơ chế Trao giá trị trước (Value-First).
+          </p>
+          <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.6; margin-top: 12px;">
+            <strong>Bản Đề Xuất Dự Án Khởi Nghiệp EXE101 • Nhóm 6 (EXE101-G06)</strong><br>
+            Trường Đại học FPT Cần Thơ • Học kỳ Fall 2026
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-col">
+          <h5>Giải Pháp &amp; Vận Hành</h5>
+          <ul class="footer-links">
+            <li><a href="#home">Tổng quan dự án</a></li>
+            <li><a href="#overview-process">Quy trình 4 bước khép kín</a></li>
+            <li><a href="#market-pain">Bài toán thị trường N=80</a></li>
+            <li><a href="#ai-assistant-demo">Trợ lý AI &amp; Bài tập 3-5p</a></li>
+            <li><a href="#data-moderation">Kiểm duyệt 2 lớp an toàn</a></li>
+          </ul>
+        </div>
+
+        <!-- Commercial Links -->
+        <div class="footer-col">
+          <h5>Thị Trường &amp; Dịch Vụ</h5>
+          <ul class="footer-links">
+            <li><a href="#pricing">Bảng giá 199.000₫ &amp; 2.000.000₫</a></li>
+            <li><a href="#competitive-edge">3 Lợi thế cạnh tranh cốt lõi</a></li>
+            <li><a href="#roadmap-risk">Lộ trình &amp; Quản lý rủi ro</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact & Legal -->
+        <div class="footer-col">
+          <h5>Thông Tin Liên Hệ</h5>
+          <ul class="footer-links">
+            <li>📍 ĐH FPT Cần Thơ, Nguyễn Văn Cừ nối dài, Ninh Kiều, Cần Thơ</li>
+            <li>✉️ <a href="mailto:edutrace.ai.assistant@gmail.com">edutrace.ai.assistant@gmail.com</a></li>
+            <li>🌐 <a href="https://www.facebook.com/edutrace.ai.official" target="_blank"
+                rel="noopener noreferrer">facebook.com/edutrace.ai.official</a></li>
+            <li>🛡️ Cam kết không rào cản công nghệ, tôn trọng quyền riêng tư gia đình</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 EduTrace AI Team - FPT University Can Tho. All Rights Reserved.</div>
+        <div style="color: #64748b;">Đề tài Nghiên cứu Khởi nghiệp Giáo dục Đặc biệt • FPTU Cần Thơ</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       MODAL: GOOGLE GEMINI AI CONFIGURATION & CLINICAL KNOWLEDGE HUB
+       ========================================================================== -->
+  <div id="geminiConfigModal" class="gemini-config-modal" style="display: none;">
+    <div class="gemini-modal-overlay" onclick="closeGeminiConfigModal()"></div>
+    <div class="gemini-modal-card">
+      <div class="gemini-modal-header">
+        <div class="gemini-modal-header-title">
+          <div class="gemini-logo-icon">✨</div>
+          <div>
+            <h3>Cấu Hình Google Gemini AI &amp; Tri Thức Y Khoa</h3>
+            <p>Dự án EduTrace AI • EXE101 Cần Thơ</p>
+          </div>
+        </div>
+        <button type="button" class="gemini-modal-close" onclick="closeGeminiConfigModal()" aria-label="Đóng modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="gemini-modal-body">
+        <!-- API Status Banner -->
+        <div id="geminiModalStatusBanner" class="gemini-status-banner">
+          <span class="status-indicator-dot"></span>
+          <span id="geminiModalStatusText">Hệ thống đang chạy chế độ: Tri thức Bác sĩ Nhi Cần Thơ (Offline)</span>
+        </div>
+
+        <!-- Form Group: API Key -->
+        <div class="gemini-form-group">
+          <div class="form-label-row">
+            <label for="geminiApiKeyInput" class="form-label">Google Gemini API Key:</label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="link-get-key">
+              🔑 Lấy key miễn phí tại Google AI Studio ↗
+            </a>
+          </div>
+          <div class="gemini-input-wrap">
+            <input type="password" id="geminiApiKeyInput" class="gemini-input" placeholder="AIzaSy..." autocomplete="off">
+            <button type="button" id="btnToggleApiKeyVisibility" class="btn-input-eye" title="Hiện / Ẩn Key">
+              👁️
+            </button>
+          </div>
+          <div class="gemini-help-text">
+            Key được lưu an toàn trong trình duyệt (Local Storage) của bạn, không gửi về bất kỳ máy chủ bên thứ ba nào.
+          </div>
+        </div>
+
+        <!-- Form Group: Model Selection -->
+        <div class="gemini-form-group">
+          <label for="geminiModelSelect" class="form-label">Chọn Mô hình Gemini AI:</label>
+          <select id="geminiModelSelect" class="gemini-select">
+            <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Khuyên dùng - Nhanh, chuẩn xác, tiết kiệm quota)</option>
+            <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Thế hệ mới nhất - Độ trễ siêu thấp)</option>
+            <option value="gemini-1.5-pro">Google Gemini 1.5 Pro (Lập luận sâu - Phù hợp phân tích ca lâm sàng phức tạp)</option>
+          </select>
+        </div>
+
+        <!-- Real-time Test Connection Box -->
+        <div class="gemini-test-row">
+          <button type="button" id="btnTestGeminiConnection" class="btn-test-connection">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            Kiểm Tra Kết Nối Trực Tiếp (Live Ping)
+          </button>
+          <span id="geminiTestResult" class="test-result-badge">Chưa kiểm tra</span>
+        </div>
+
+        <!-- Knowledge Base Inspection Summary -->
+        <div class="gemini-knowledge-summary">
+          <div class="kb-summary-header">
+            <span>📚 Cơ sở Tri thức Chuyên gia đã nạp vào Gemini:</span>
+            <span class="badge-active-count" id="geminiKbCount">Đã nạp 5 Modules &amp; 10 Bài tập</span>
+          </div>
+          <div class="kb-tags-grid">
+            <span class="kb-tag">✓ M-CHAT-R/F (20 Tiêu chí)</span>
+            <span class="kb-tag">✓ Tiêu chuẩn DSM-5 (ASD &amp; ADHD)</span>
+            <span class="kb-tag">✓ Mốc Denver II (18m - 6y)</span>
+            <span class="kb-tag">✓ ABA, PECS, Điều hòa cảm giác SI</span>
+            <span class="kb-tag">✓ 5 Cơ sở y tế Q. Ninh Kiều, Cần Thơ</span>
+            <span class="kb-tag">✓ 10 Video can thiệp 3-5 phút chuẩn hóa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gemini-modal-footer">
+        <button type="button" id="btnClearGeminiKey" class="btn-clear-key">
+          Xóa Key (Về Offline)
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-cancel" onclick="closeGeminiConfigModal()">Hủy</button>
+          <button type="button" id="btnSaveGeminiConfig" class="btn-save-key">Lưu Cấu Hình</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- Specialized Clinical Knowledge Base & Google Gemini AI Service -->
+  <script src="js/gemini-knowledge.js"></script>
+  <script src="js/gemini-service.js"></script>
+  <script src="script.js"></script>
+  <script src="js/gemini-chatbot-ui.js"></script>
+  <!-- Firebase integration: remains in demo mode until js/firebase-config.js is configured. -->
+  <script type="module" src="js/firebase-integration.js"></script>
+</body>
+
+</html>

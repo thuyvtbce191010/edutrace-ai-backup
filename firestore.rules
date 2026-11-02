@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Prototype only: public visitors may submit limited contact details.
+    // Nobody can read, update, or delete submissions from the browser.
+    match /leads/{leadId} {
+      allow create: if
+        request.resource.data.keys().hasAll([
+          "name", "phone", "email", "role", "createdAt", "source"
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          "name", "phone", "email", "role", "createdAt", "source"
+        ]) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        request.resource.data.name.size() <= 100 &&
+        request.resource.data.phone is string &&
+        request.resource.data.phone.size() >= 8 &&
+        request.resource.data.phone.size() <= 20 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() <= 254 &&
+        request.resource.data.role in [
+          "parent", "center", "doctor", "investor"
+        ] &&
+        request.resource.data.source == "edutrace-ai-website" &&
+        request.resource.data.createdAt == request.time;
+
+      allow read, update, delete: if false;
+    }
+
+    // Booking requests are requests only, not confirmed appointments.
+    // Child details and trial/health feedback are not collected by this starter.
+    match /bookingRequests/{requestId} {
+      allow create: if
+        request.resource.data.keys().hasAll([
+          "parentName", "parentPhone", "targetCenter",
+          "preferredSchedule", "status", "createdAt", "source"
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          "parentName", "parentPhone", "targetCenter",
+          "preferredSchedule", "status", "createdAt", "source"
+        ]) &&
+        request.resource.data.parentName is string &&
+        request.resource.data.parentName.size() > 0 &&
+        request.resource.data.parentName.size() <= 100 &&
+        request.resource.data.parentPhone is string &&
+        request.resource.data.parentPhone.size() >= 8 &&
+        request.resource.data.parentPhone.size() <= 20 &&
+        request.resource.data.targetCenter is string &&
+        request.resource.data.targetCenter.size() > 0 &&
+        request.resource.data.targetCenter.size() <= 200 &&
+        request.resource.data.preferredSchedule in [
+          "weekend", "weekday_morning", "weekday_afternoon"
+        ] &&
+        request.resource.data.status == "pending" &&
+        request.resource.data.source == "edutrace-ai-website" &&
+        request.resource.data.createdAt == request.time;
+
+      allow read, update, delete: if false;
+    }
+
+    // User profiles: authenticated users can manage their own profile document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Deny everything else unless explicitly allowed above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
