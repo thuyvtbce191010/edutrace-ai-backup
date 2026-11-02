@@ -29,6 +29,10 @@ test('Functions: chặn người thường, admin tạo, khóa và xóa tài kho
     const disabled = (await manage({ action: 'disable', uid: created.uid })).data;
     assert.equal(disabled.authUpdated, true);
     assert.equal((await getAdminAuth(admin).getUser(created.uid)).disabled, true);
+    const enabled = (await manage({ action: 'enable', uid: created.uid })).data;
+    assert.equal(enabled.profileUpdated, true);
+    assert.equal((await getAdminAuth(admin).getUser(created.uid)).disabled, false);
+    await assert.rejects(manage({ action: 'delete', uid: caller.uid }), { code: 'functions/invalid-argument' });
     const deleted = (await manage({ action: 'delete', uid: created.uid })).data;
     assert.equal(deleted.authDeleted, true);
     assert.equal(deleted.profileDeleted, true);

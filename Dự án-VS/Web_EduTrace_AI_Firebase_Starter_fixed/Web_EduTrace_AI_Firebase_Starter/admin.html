@@ -442,9 +442,9 @@
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
               <input type="password" id="adminGeminiKeyInput" placeholder="Google Gemini API Key..." class="form-control" style="width: 220px; padding: 8px 12px; font-size: 0.85rem;">
               <select id="adminGeminiModelSelect" class="form-control" style="width: 170px; padding: 8px 12px; font-size: 0.85rem;">
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+                <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+                <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
               </select>
               <button type="button" class="btn btn-sm btn-primary" id="btnAdminSaveGeminiKey">Lưu Cấu Hình</button>
               <button type="button" class="btn btn-sm btn-outline-light" id="btnAdminTestGeminiPing" style="color: #0284c7; border-color: #bae6fd;">Live Ping</button>
@@ -571,10 +571,10 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Trạng thái tài khoản *</label>
+              <label class="form-label">Trạng thái hồ sơ *</label>
               <select id="editUserStatus" class="form-control" required>
                 <option value="active">Đang hoạt động</option>
-                <option value="blocked">Tạm khóa tài khoản</option>
+                <option value="blocked">Tạm khóa hồ sơ</option>
               </select>
             </div>
           </div>

@@ -578,7 +578,7 @@ function initGeminiConfigModal() {
     if (!keyInput || !testResult || !window.geminiService) return;
 
     const testKey = keyInput.value.trim();
-    const testModel = modelSelect ? modelSelect.value : 'gemini-1.5-flash';
+    const testModel = modelSelect ? modelSelect.value : window.geminiService.DEFAULT_MODEL;
 
     if (!testKey) {
       testResult.textContent = '⚠️ Vui lòng nhập API Key để kiểm tra';
@@ -614,7 +614,7 @@ function initGeminiConfigModal() {
     if (!keyInput || !window.geminiService) return;
 
     const newKey = keyInput.value.trim();
-    const newModel = modelSelect ? modelSelect.value : 'gemini-1.5-flash';
+    const newModel = modelSelect ? modelSelect.value : window.geminiService.DEFAULT_MODEL;
 
     window.geminiService.setApiKey(newKey);
     window.geminiService.setModel(newModel);
@@ -724,7 +724,7 @@ function initAIAssistant() {
   const updateGeminiModeBadge = () => {
     if (!geminiModeBadge) return;
     const isConfigured = window.geminiService ? window.geminiService.isConfigured() : false;
-    const model = window.geminiService ? window.geminiService.getModel() : 'gemini-1.5-flash';
+    const model = window.geminiService ? window.geminiService.getModel() : 'gemini-3.5-flash-lite';
 
     if (isConfigured) {
       geminiModeBadge.textContent = `🟢 Đang chạy Google ${model} (AI Trực Tiếp)`;

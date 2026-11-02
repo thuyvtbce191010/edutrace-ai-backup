@@ -8,13 +8,13 @@ class EduTraceGeminiService {
   constructor() {
     this.STORAGE_KEY_API = 'edutrace_gemini_api_key';
     this.STORAGE_KEY_MODEL = 'edutrace_gemini_model';
-    this.DEFAULT_MODEL = 'gemini-1.5-flash';
+    this.DEFAULT_MODEL = 'gemini-3.5-flash-lite';
     this.API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
     
     this.supportedModels = [
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Tốc độ cao, Khuyên dùng)', isDefault: true },
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Thế hệ mới nhất)' },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Lập luận y khoa chuyên sâu)' }
+      { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite', isDefault: true },
+      { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash' },
+      { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash' }
     ];
   }
 
@@ -46,7 +46,8 @@ class EduTraceGeminiService {
    */
   getModel() {
     if (window.edutraceGeminiCloud) return 'gemini-3.8-flash';
-    return localStorage.getItem(this.STORAGE_KEY_MODEL) || this.DEFAULT_MODEL;
+    const saved = localStorage.getItem(this.STORAGE_KEY_MODEL);
+    return this.supportedModels.some(model => model.id === saved) ? saved : this.DEFAULT_MODEL;
   }
 
   /**
@@ -118,8 +119,7 @@ class EduTraceGeminiService {
             parts: [{ text: 'Xin chào, phản hồi ngắn gọn: "EduTrace AI Kết nối thành công!".' }]
           }],
           generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 60
+            maxOutputTokens: 512
           }
         })
       });
@@ -142,7 +142,8 @@ class EduTraceGeminiService {
       }
 
       const data = await response.json();
-      const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Kết nối thành công!';
+      const replyText = data?.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+      if (!replyText) return { success: false, latencyMs, error: 'Gemini không trả về nội dung.' };
 
       return {
         success: true,
@@ -190,7 +191,6 @@ class EduTraceGeminiService {
         parts: [{ text: `Tình trạng phụ huynh chia sẻ về con: "${userInput}"\n\nHãy phân tích và trả về định dạng JSON theo đúng hướng dẫn.` }]
       }],
       generationConfig: {
-        temperature: 0.2,
         maxOutputTokens: 1200
       }
     };
@@ -272,7 +272,6 @@ class EduTraceGeminiService {
       },
       contents: formattedContents,
       generationConfig: {
-        temperature: 0.5,
         maxOutputTokens: 1024
       }
     };

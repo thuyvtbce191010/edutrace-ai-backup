@@ -312,14 +312,14 @@ function setupAdminApp() {
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                   </svg>
                 </button>
-                <button type="button" class="btn-icon btn-toggle-status" data-uid="${u.uid}" title="${isBlocked ? "Mở khóa tài khoản" : "Tạm khóa tài khoản"}">
+                <button type="button" class="btn-icon btn-toggle-status" data-uid="${u.uid}" title="${isBlocked ? 'Mở khóa' : 'Tạm khóa'} ${accountFunctionsEnabled ? 'tài khoản' : 'hồ sơ'}">
                   ${
                     isBlocked
                       ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`
                       : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
                   }
                 </button>
-                <button type="button" class="btn-icon danger btn-delete-user" data-uid="${u.uid}" title="Xóa tài khoản">
+                <button type="button" class="btn-icon danger btn-delete-user" data-uid="${u.uid}" title="Xóa ${accountFunctionsEnabled ? 'tài khoản' : 'hồ sơ'}">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -372,6 +372,7 @@ function setupAdminApp() {
         if (accountFunctionsEnabled) {
           const action = existing?.status === 'blocked' ? 'enable' : 'disable';
           const result = await manageUserAccount({ uid, action });
+          if (result.tokensRevoked === false) throw new Error('Tài khoản đã bị khóa nhưng chưa thu hồi được phiên đăng nhập; cần xử lý thủ công.');
           if (!result.profileUpdated) throw new Error('Tài khoản Auth đã thay đổi nhưng hồ sơ chưa đồng bộ.');
           showToast('Đã cập nhật tài khoản đăng nhập và hồ sơ.');
           await refreshUsers();
@@ -385,7 +386,7 @@ function setupAdminApp() {
         }
         } catch (error) {
           console.error("Cập nhật trạng thái thất bại:", error);
-          showToast(error.message?.includes('đã thay đổi') ? error.message : "Không thể cập nhật trạng thái hồ sơ.");
+          showToast(error.message?.includes('đã thay đổi') || error.message?.includes('đã bị khóa') ? error.message : "Không thể cập nhật trạng thái hồ sơ.");
         } finally { btn.disabled = false; }
       });
     });
@@ -401,7 +402,10 @@ function setupAdminApp() {
           return;
         }
 
-        if (confirm(`Bạn có chắc chắn muốn xóa tài khoản "${user?.displayName || uid}" khỏi hệ thống?`)) {
+        const deleteMessage = accountFunctionsEnabled
+          ? `Xóa tài khoản đăng nhập và hồ sơ "${user?.displayName || uid}"?`
+          : `Xóa hồ sơ "${user?.displayName || uid}"? Tài khoản đăng nhập vẫn còn.`;
+        if (confirm(deleteMessage)) {
           btn.disabled = true;
           try {
             if (accountFunctionsEnabled) {
@@ -463,7 +467,9 @@ function setupAdminApp() {
     editPhone.value = user.phone || "";
     editRole.value = user.role || "parent";
     editStatus.value = user.status || "active";
-    document.getElementById('accountManagementHint').textContent = 'Sửa hồ sơ; dùng nút khóa hoặc mở khóa để thay đổi trạng thái đăng nhập.';
+    document.getElementById('accountManagementHint').textContent = accountFunctionsEnabled
+      ? 'Sửa hồ sơ; dùng nút khóa hoặc mở khóa để thay đổi trạng thái đăng nhập.'
+      : 'Thao tác này chỉ quản lý hồ sơ; không thay đổi tài khoản đăng nhập.';
     const passwordGroup = document.getElementById('groupUserPassword');
     if (passwordGroup) passwordGroup.hidden = true;
     if (editPassword) { editPassword.value = ''; editPassword.required = false; }
@@ -744,7 +750,7 @@ function setupAdminApp() {
     btnAdminSaveGeminiKey?.addEventListener("click", () => {
       if (!window.geminiService || !adminGeminiKeyInput) return;
       const key = adminGeminiKeyInput.value.trim();
-      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : "gemini-1.5-flash";
+      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : window.geminiService.DEFAULT_MODEL;
 
       window.geminiService.setApiKey(key);
       window.geminiService.setModel(model);
@@ -761,7 +767,7 @@ function setupAdminApp() {
     btnAdminTestGeminiPing?.addEventListener("click", async () => {
       if (!window.geminiService || !adminGeminiKeyInput) return;
       const key = adminGeminiKeyInput.value.trim();
-      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : "gemini-1.5-flash";
+      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : window.geminiService.DEFAULT_MODEL;
 
       if (!key) {
         showToast("Vui lòng nhập API Key để kiểm tra kết nối!");
