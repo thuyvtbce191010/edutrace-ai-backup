@@ -1,31 +1,49 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 1. Quản lý thông tin đăng ký tư vấn (Leads)
-    // Cho phép khách vãng lai gửi yêu cầu, Admin có quyền xem và cập nhật trạng thái
-    match /leads/{leadId} {
-      allow create: if true;
-      allow read, update, delete: if true;
+    function isAdmin() {
+      return request.auth != null && request.auth.token.get('admin', false) == true;
     }
-
-    // 2. Quản lý yêu cầu đặt lịch can thiệp 1-1 tại trung tâm (Booking Requests)
-    // Cho phép khách gửi yêu cầu đặt lịch, Admin có quyền xem và xác nhận lịch hẹn
-    match /bookingRequests/{requestId} {
-      allow create: if true;
-      allow read, update, delete: if true;
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
     }
-
-    // 3. Quản lý hồ sơ người dùng (User Profiles)
-    // Cho phép người dùng lưu thông tin khi đăng ký trên mọi thiết bị
-    // Và cho phép bảng điều khiển Admin đọc toàn bộ danh sách để đồng bộ giữa các máy
-    match /users/{userId} {
-      allow read, write: if true;
+    function regularRole(role) {
+      return role in ['parent', 'center', 'doctor', 'investor'];
     }
-
-    // Chặn các đường dẫn chưa được khai báo
-    match /{document=**} {
-      allow read, write: if false;
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isAdmin() || (isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && regularRole(request.resource.data.role)
+        && !request.resource.data.keys().hasAny(['status']));
+      allow update: if isAdmin() || (isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['displayName', 'phone', 'role', 'roleLabel', 'photoURL', 'updatedAt'])
+        && regularRole(request.resource.data.role));
+      allow delete: if isAdmin();
     }
+    match /leads/{id} {
+      allow create: if request.resource.data.keys().hasAll(['name', 'phone', 'email', 'role', 'createdAt', 'source'])
+        && request.resource.data.keys().hasOnly(['name', 'phone', 'email', 'role', 'createdAt', 'source'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100
+        && request.resource.data.phone is string && request.resource.data.phone.size() >= 8 && request.resource.data.phone.size() <= 20
+        && request.resource.data.email is string && request.resource.data.email.size() <= 254
+        && regularRole(request.resource.data.role)
+        && request.resource.data.source == 'edutrace-ai-website' && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+    match /bookingRequests/{id} {
+      allow create: if request.resource.data.keys().hasAll(['parentName', 'parentPhone', 'targetCenter', 'preferredSchedule', 'status', 'createdAt', 'source'])
+        && request.resource.data.keys().hasOnly(['parentName', 'parentPhone', 'targetCenter', 'preferredSchedule', 'status', 'createdAt', 'source'])
+        && request.resource.data.parentName is string && request.resource.data.parentName.size() > 0 && request.resource.data.parentName.size() <= 100
+        && request.resource.data.parentPhone is string && request.resource.data.parentPhone.size() >= 8 && request.resource.data.parentPhone.size() <= 20
+        && request.resource.data.targetCenter is string && request.resource.data.targetCenter.size() > 0 && request.resource.data.targetCenter.size() <= 200
+        && request.resource.data.preferredSchedule in ['weekend', 'weekday_morning', 'weekday_afternoon']
+        && request.resource.data.status == 'pending'
+        && request.resource.data.source == 'edutrace-ai-website' && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

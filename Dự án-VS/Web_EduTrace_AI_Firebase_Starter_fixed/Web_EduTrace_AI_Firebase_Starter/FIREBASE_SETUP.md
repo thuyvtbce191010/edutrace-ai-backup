@@ -1,74 +1,32 @@
-# EduTrace AI — Firebase Firestore & Authentication Guide
+# EduTrace AI — chạy và cấu hình
 
-## Những tính năng mới đã tích hợp
-1. **Hệ thống Đăng ký & Đăng nhập hoàn chỉnh:**
-   - Đăng ký tài khoản mới qua Email & Mật khẩu với đầy đủ thông tin: Họ tên, Số điện thoại, Vai trò (Phụ huynh, Trung tâm can thiệp, Chuyên viên/Bác sĩ, Đối tác).
-   - Đánh giá trực quan độ mạnh mật khẩu (Password Strength Meter) theo thời gian thực.
-   - Ẩn/Hiện mật khẩu với nút con mắt tiện lợi.
-   - Đăng nhập qua Email & Mật khẩu.
-   - Đăng nhập nhanh một chạm bằng tài khoản Google (`signInWithPopup`).
-   - Tính năng Quên mật khẩu & gửi email khôi phục an toàn (`sendPasswordResetEmail`).
-2. **Quản lý Hồ sơ người dùng & Lịch hẹn:**
-   - Hiển thị Avatar (hình đại diện hoặc chữ cái đầu), Tên người dùng và Huy hiệu vai trò trên thanh Menu (Navbar).
-   - Menu Dropdown tài khoản: Xem thông tin tài khoản, Lịch hẹn đã gửi, Đăng xuất.
-   - Modal quản lý hồ sơ: Cho phép người dùng cập nhật Tên, SĐT, Vai trò.
-   - Theo dõi lịch sử: Tự động lưu và hiển thị danh sách các Yêu cầu tư vấn (`leads`) và Yêu cầu đặt lịch khám 1-1 (`bookingRequests`) đã nộp.
-3. **Tự động điền dữ liệu (Autofill):**
-   - Khi người dùng đã đăng nhập, hệ thống tự động điền Họ tên, Email, Số điện thoại, Vai trò vào Form tư vấn và Form đặt lịch can thiệp 1-1.
-4. **Chế độ Demo Fallback thông minh:**
-   - Tích hợp sẵn 3 tài khoản thử nghiệm nhanh (click 1 chạm để điền):
-     * Phụ huynh mẫu: `demo.parent@edutrace.vn`
-     * Trung tâm mẫu: `demo.center@edutrace.vn`
-     * Chuyên viên mẫu: `demo.doctor@edutrace.vn`
-   - Nếu dự án Firebase chưa kịp bật provider trong Console, hệ thống sẽ tự động chuyển sang chế độ Demo an toàn để người dùng và ban giám khảo vẫn trải nghiệm được 100% giao diện và luồng hoạt động mà không bị báo lỗi gián đoạn!
+Đây là ứng dụng HTML/CSS/JavaScript tĩnh, có tích hợp Firebase và chế độ demo. Chạy `Chay_EduTrace_AI.bat` hoặc phục vụ thư mục này bằng máy chủ HTTP; không mở trực tiếp bằng `file://`. Trang chính là `index.html`, trang quản trị là `admin.html`.
 
----
+## Firebase
 
-## Hướng dẫn cấu hình Firebase Console
+- Cấu hình dự án web nằm trong `js/firebase-config.js`. Bật các phương thức Email/Password và Google trong Firebase Authentication nếu cần dùng đăng nhập thật; cấu hình các domain được phép trong Firebase Console.
+- File `firestore.rules` yêu cầu custom claim `admin: true` cho các thao tác quản trị. Ngày 02/11/2026, phiên bản này đã được xuất bản cho database mặc định của dự án `edutrace-ai` và xác minh qua API; cấu hình cloud có thể thay đổi sau thời điểm này.
+- Chế độ đăng nhập giả lập đã tắt trong mã nguồn. Tài khoản quản trị cần Firebase Authentication và custom claim `admin: true`; tài khoản demo không còn vào được cổng quản trị. Các thao tác tạo, khóa và xóa tài khoản Firebase Authentication vẫn chưa được triển khai phía máy chủ.
+- Gemini hiện được gọi trực tiếp từ trình duyệt và khóa được lưu trong localStorage của trình duyệt đó. Không dùng khóa dùng chung hoặc dữ liệu nhạy cảm theo cách này trong môi trường thật.
 
-### 1. Kích hoạt Firebase Authentication
-1. Truy cập [Firebase Console](https://console.firebase.google.com/) và chọn dự án `edutrace-ai`.
-2. Ở thanh bên trái, chọn **Build > Authentication > Get started**.
-3. Vào tab **Sign-in method**:
-   - **Email/Password**: Nhấp chọn, gạt công tắc **Enable**, sau đó nhấn **Save**.
-   - **Google**: Nhấp chọn, gạt công tắc **Enable**, chọn email hỗ trợ dự án và nhấn **Save**.
-4. (Tùy chọn) Thêm domain kiểm thử vào tab **Settings > Authorized domains** (ví dụ: `localhost`, `127.0.0.1`, hoặc domain hosting triển khai).
+## Cấu trúc và kiểm thử
 
-### 2. Cập nhật Firestore Security Rules
-Vào **Firestore Database > Rules**, dán nội dung từ file `firestore.rules` và nhấn **Publish**:
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /leads/{leadId} {
-      allow create, read, update, delete: if true;
-    }
-    match /bookingRequests/{requestId} {
-      allow create, read, update, delete: if true;
-    }
-    // Cho phép đồng bộ danh sách tài khoản đa máy qua Cloud Firestore
-    match /users/{userId} {
-      allow read, write: if true;
-    }
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-}
-```
+- `index.html`, `style.css`, `script.js`: giao diện và chức năng trang chính.
+- `admin.html`, `admin.css`, `js/admin.js`: giao diện và điều khiển trang quản trị.
+- `js/firebase-auth.js`, `js/firebase-integration.js`: xác thực và dữ liệu Firebase; `js/cloud-page.js`, `js/pagination.js`, `js/admin-filters.js` và `js/admin-csv.js`: phân trang cloud, phân trang giao diện, lọc và xuất CSV; `admin-pagination.css`: giao diện phân trang.
+- Cài công cụ kiểm thử với Node.js 24 và Java: `npm install`. Chạy kiểm thử đơn vị bằng `npm test`. Chạy Firebase Auth và Firestore Emulator với `npm run test:integration`; chỉ sử dụng project giả lập `demo-edutrace`, không kết nối dữ liệu thật. Lần chạy đầu có thể cần tải emulator.
+- Nếu Firestore Emulator không khởi động từ đường dẫn chứa ký tự Unicode trên Windows, mở một terminal tại thư mục dự án và chạy `java -jar "$env:USERPROFILE\.cache\firebase\emulators\cloud-firestore-emulator-v1.22.0.jar" --host 127.0.0.1 --port 18080 --project_id demo-edutrace --rules firestore.rules`. Trong terminal thứ hai tại cùng thư mục, chạy `$env:FIRESTORE_EMULATOR_HOST='127.0.0.1:18080'; npx firebase emulators:exec --project demo-edutrace --config firebase.test.json --only auth "node --test tests/integration/firebase.test.js"`. Dừng Java sau khi kiểm thử.
 
-### 3. Kiểm tra cấu hình Web trong `js/firebase-config.js`
-Đảm bảo thông tin API key, authDomain và projectId khớp với Web App đã đăng ký trong Firebase Console:
-```javascript
-export const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "edutrace-ai.firebaseapp.com",
-  projectId: "edutrace-ai",
-  appId: "1:..."
-};
-```
+Ngày 02/11/2026 đã xác minh Rules đang hoạt động là `ac361c91-1c8f-4877-81a3-7da4f2165361`; phiên bản trước là `e13a2a77-73c8-46cd-805e-844f71556801`. Người không đăng nhập bị từ chối khi đọc collection `users`. Chưa kiểm thử toàn bộ luồng ứng dụng với tài khoản admin thật.
 
----
+Bảng người dùng tải toàn bộ hồ sơ cloud theo các lô tối đa 50 bản ghi và chỉ dùng bản tải đó cho tìm kiếm và thống kê; nút làm mới tải lại. CSV cũng đọc toàn bộ người dùng trực tiếp từ cloud, không kèm dữ liệu mẫu cục bộ. Các thay đổi đồng thời trong quá trình tải có thể ảnh hưởng kết quả; với dữ liệu lớn, cách này phát sinh số lượt đọc và cần thay bằng tìm kiếm/thống kê phía máy chủ. Bảng lịch hẹn vẫn tải từng lô và gộp dữ liệu cục bộ; bộ lọc chỉ bao gồm dữ liệu đã tải.
 
-## Cách chạy thử dự án
-Mở thư mục bằng **VS Code** và khởi chạy qua tiện ích mở rộng **Live Server** (hoặc bất kỳ máy chủ HTTP cục bộ nào như `npx serve .` hoặc `python -m http.server 8000`). Tránh mở trực tiếp qua giao thức `file://` để trình duyệt tải được các module Javascript (`<script type="module">`).
+Các kiểm thử emulator sử dụng `firestore.rules` cục bộ; chúng không kiểm tra cấu hình cloud. Kiểm thử quản lý trạng thái chỉ thay đổi hồ sơ Firestore, chưa khóa tài khoản Firebase Authentication.
+
+`firestore.secure.rules` là bản dự thảo tương ứng với Rules cục bộ. Khi Firestore Emulator đang chạy, kiểm thử bằng `$env:FIRESTORE_EMULATOR_HOST='127.0.0.1:18080'; node --test tests/integration/rules.test.js`. Kiểm thử xóa dữ liệu trong emulator; không trỏ biến này tới hệ thống thật. Cần kiểm thử toàn bộ luồng trước khi xuất bản Rules.
+
+Tập lệnh `scripts/grant-admin.js` cấp custom claim cho một UID đã tồn tại, sử dụng Application Default Credentials của người vận hành: `node scripts/grant-admin.js edutrace-ai <UID>`. Không gửi hoặc lưu tệp khóa dịch vụ vào kho mã. Lệnh thay đổi quyền truy cập thật; phải xác minh UID, dự án, quyền người vận hành và Rules trước khi chạy. Người dùng được cấp quyền cần đăng nhập lại.
+
+`firebase.deploy.json` là cấu hình chuẩn bị cho hosting và functions, chưa dùng để triển khai. Chạy `npm run build:hosting` để tạo `.hosting-public` chỉ gồm tệp website trước khi kiểm thử hosting hoặc triển khai. Các cờ `accountFunctionsEnabled` và `geminiCloudEnabled` đang tắt. Trước khi bật, cần triển khai và kiểm thử Functions; đối với Gemini còn cần cấu hình App Check, đặt `appCheckSiteKey`, đặt khóa trong Secret Manager, giới hạn mức sử dụng và kiểm thử phản hồi thực tế. Khi cờ Gemini còn tắt, giao diện vẫn dùng cách gọi cũ và khóa trong trình duyệt. Không coi việc có mã bridge là đã chuyển khóa sang máy chủ.
+
+Kiểm thử quản lý tài khoản với Functions, Auth và Firestore Emulator (không dùng dự án thật): trong PowerShell đặt `$env:FUNCTIONS_EMULATOR_HOST='127.0.0.1:15001'`, sau đó chạy `npx firebase emulators:exec --project demo-edutrace --config firebase.test.json --only auth,firestore,functions "node --test tests/integration/account-functions.test.js"`. Nếu Firestore gặp lỗi đường dẫn Unicode, chạy Firestore Emulator thủ công như hướng dẫn ở trên, đặt thêm `$env:FIRESTORE_EMULATOR_HOST='127.0.0.1:18080'` và chạy lại lệnh với `--only auth,functions`. Kiểm thử này bao gồm từ chối người không có quyền admin, tạo, khóa, mở khóa, xóa và ngăn admin tự xóa. Emulator không chứng minh chức năng đã triển khai hoặc hoạt động với Firebase thật.

@@ -20,6 +20,21 @@ import {
   DEMO_PRESET_ACCOUNTS,
   ROLE_LABELS
 } from "./firebase-auth.js";
+import { escapeHtml } from "./escape-html.js";
+
+function setAvatar(element, photoURL, displayName, initial) {
+  if (!element) return;
+  try {
+    const url = new URL(photoURL);
+    if (url.protocol !== 'https:') throw new Error('Invalid image URL');
+    const image = document.createElement('img');
+    image.src = url.href;
+    image.alt = displayName;
+    element.replaceChildren(image);
+  } catch {
+    element.textContent = initial;
+  }
+}
 
 // Helper for showing toast messages
 function notifyToast(message) {
@@ -184,6 +199,10 @@ export function setupAuthUI() {
 
     try {
       const res = await loginWithEmail({ email, password });
+      if (res.user?.role === "admin") {
+        window.location.href = "admin.html";
+        return;
+      }
       closeAuthDialog();
       formLogin.reset();
       const userName = res.user?.displayName || "bạn";
@@ -254,6 +273,10 @@ export function setupAuthUI() {
     hideAuthAlerts();
     try {
       const res = await loginWithGoogle();
+      if (res.user?.role === "admin") {
+        window.location.href = "admin.html";
+        return;
+      }
       closeAuthDialog();
       notifyToast(`Đăng nhập Google thành công! Xin chào ${res.user?.displayName || "bạn"}.`);
     } catch (err) {
@@ -487,13 +510,7 @@ function updateNavbarAuthState(user) {
     const navAvatar = document.getElementById("navUserAvatar");
     const navName = document.getElementById("navUserName");
     const navRole = document.getElementById("navUserRole");
-    if (navAvatar) {
-      if (user.photoURL) {
-        navAvatar.innerHTML = `<img src="${user.photoURL}" alt="${displayName}">`;
-      } else {
-        navAvatar.textContent = initial;
-      }
-    }
+    setAvatar(navAvatar, user.photoURL, displayName, initial);
     if (navName) navName.textContent = displayName;
     if (navRole) navRole.textContent = roleText;
 
@@ -503,13 +520,7 @@ function updateNavbarAuthState(user) {
     const dropdownEmail = document.getElementById("dropdownUserEmail");
     const dropdownRole = document.getElementById("dropdownUserRole");
 
-    if (dropdownAvatar) {
-      if (user.photoURL) {
-        dropdownAvatar.innerHTML = `<img src="${user.photoURL}" alt="${displayName}">`;
-      } else {
-        dropdownAvatar.textContent = initial;
-      }
-    }
+    setAvatar(dropdownAvatar, user.photoURL, displayName, initial);
     if (dropdownName) dropdownName.textContent = displayName;
     if (dropdownEmail) dropdownEmail.textContent = user.email;
     if (dropdownRole) dropdownRole.textContent = roleText;
@@ -607,13 +618,7 @@ function updateProfileModalData(user) {
   if (roleSelect && user.role) roleSelect.value = user.role;
   if (createdAtSpan) createdAtSpan.textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "Hôm nay";
 
-  if (avatarBig) {
-    if (user.photoURL) {
-      avatarBig.innerHTML = `<img src="${user.photoURL}" alt="${displayName}">`;
-    } else {
-      avatarBig.textContent = initial;
-    }
-  }
+  setAvatar(avatarBig, user.photoURL, displayName, initial);
 }
 
 // Render activities list inside Profile Modal
@@ -662,13 +667,13 @@ function renderUserBookingsList() {
           </div>
           <div class="activity-details">
             <div class="activity-title-row">
-              <h4>${title}</h4>
+              <h4>${escapeHtml(title)}</h4>
               <span class="activity-status-badge status-pending">Đã tiếp nhận</span>
             </div>
             <p class="activity-meta">
-              <span>📅 ${act.createdAt}</span>
-              ${phone ? `<span>📞 ${phone}</span>` : ""}
-              ${schedule ? `<span>⏰ ${schedule}</span>` : ""}
+              <span>📅 ${escapeHtml(act.createdAt)}</span>
+              ${phone ? `<span>📞 ${escapeHtml(phone)}</span>` : ""}
+              ${schedule ? `<span>⏰ ${escapeHtml(schedule)}</span>` : ""}
             </p>
           </div>
         </div>

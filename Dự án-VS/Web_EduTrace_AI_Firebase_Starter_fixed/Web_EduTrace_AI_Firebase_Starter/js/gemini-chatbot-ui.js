@@ -236,7 +236,7 @@ class EduTraceChatbotUI {
     const quickSetup = document.getElementById('btnChatQuickSetup');
     const headerStatus = document.getElementById('chatHeaderStatus');
     const isConfigured = window.geminiService?.isConfigured();
-    const model = window.geminiService?.getModel() || 'gemini-1.5-flash';
+    const model = window.geminiService?.getModel() || 'gemini-3.5-flash-lite';
 
     if (!notice || !badgeText) return;
 

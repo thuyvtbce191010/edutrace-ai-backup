@@ -1,0 +1,12 @@
+{
+  "functions": { "source": "functions" },
+  "hosting": {
+    "public": ".hosting-public",
+    "ignore": [
+      "firebase*.json", "package*.json", "firestore*.rules", "*.md", "*.ps1", "*.bat",
+      "**/.*", "**/node_modules/**", "functions/**", "scripts/**", "tests/**"
+    ]
+  },
+  "firestore": { "rules": "firestore.rules" },
+  "emulators": { "hosting": { "host": "127.0.0.1", "port": 15000 } }
+}

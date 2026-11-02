@@ -11,6 +11,7 @@ import {
   loginWithEmail,
   logoutUser,
   getAllUsersList,
+  fetchAllCloudUsers,
   saveUserByAdmin,
   deleteUserByAdmin,
   toggleUserStatusByAdmin,
@@ -20,6 +21,12 @@ import {
   updateActivityStatus,
   ROLE_LABELS
 } from "./firebase-auth.js";
+import { paginate, updatePagination } from "./pagination.js";
+import { filterUsers, filterActivities } from "./admin-filters.js";
+import { createUsersCsv } from "./admin-csv.js";
+import { escapeHtml } from "./escape-html.js";
+import { accountFunctionsEnabled, manageUserAccount } from "./admin-functions.js";
+import "./gemini-cloud-client.js";
 
 // Helper for toast notifications
 function showToast(message) {
@@ -99,11 +106,32 @@ function setupAdminApp() {
   const bookingStatusFilter = document.getElementById("bookingStatusFilter");
 
   let currentAdminUser = null;
+  let dashboardLoaded = false;
+  let cloudUsers = [];
+  let bookingCloudHasMore = true;
+  let userPage = 1;
+  let bookingPage = 1;
+  const userPagination = document.getElementById("userPagination");
+  const bookingPagination = document.getElementById("bookingPagination");
+  userPagination?.addEventListener("click", (event) => {
+    const action = event.target.dataset.page;
+    if (action === "previous" || action === "next") {
+      userPage += action === "next" ? 1 : -1;
+      renderUsersTable();
+    }
+  });
+  bookingPagination?.addEventListener("click", (event) => {
+    const action = event.target.dataset.page;
+    if (action === "previous" || action === "next") {
+      bookingPage += action === "next" ? 1 : -1;
+      renderBookingsTable();
+    }
+  });
 
   // 1. AUTH STATE & ACCESS GUARD
   subscribeAuth((user) => {
     currentAdminUser = user;
-    if (user && user.role === "admin") {
+    if (user?.isAdmin === true && !user.isDemo) {
       // Authenticated as Admin
       guardSection.style.display = "none";
       workspace.classList.add("active");
@@ -114,6 +142,8 @@ function setupAdminApp() {
       renderDashboard();
     } else {
       // Not logged in or not admin
+      cloudUsers = [];
+      dashboardLoaded = false;
       guardSection.style.display = "flex";
       workspace.classList.remove("active");
       if (headerUserPill) headerUserPill.style.display = "none";
@@ -135,7 +165,7 @@ function setupAdminApp() {
 
     try {
       const res = await loginWithEmail({ email, password });
-      if (res.user && res.user.role !== "admin") {
+      if (!res.user?.isAdmin || res.user.isDemo) {
         if (guardError) {
           guardError.textContent = "Tài khoản của bạn không có quyền Quản trị viên (Admin).";
           guardError.style.display = "flex";
@@ -195,22 +225,18 @@ function setupAdminApp() {
   function renderDashboard() {
     renderUsersTable();
     renderBookingsTable();
-
-    // Đồng bộ người dùng và dữ liệu từ Cloud Firestore Database trong nền
-    syncUsersWithFirestore().then(() => {
-      renderUsersTable();
-    }).catch((e) => console.info("Đồng bộ Firestore users:", e));
-
-    syncActivitiesWithFirestore().then(() => {
-      renderBookingsTable();
-    }).catch((e) => console.info("Đồng bộ Firestore activities:", e));
+    if (!dashboardLoaded) {
+      dashboardLoaded = true;
+      btnSyncFirestore?.click();
+      btnSyncBookingsFirestore?.click();
+    }
   }
 
   // Render Users Table with search and filters
   function renderUsersTable() {
     if (!userTableBody) return;
 
-    const allUsers = getAllUsersList();
+    const allUsers = cloudUsers;
     const query = (userSearchInput?.value || "").toLowerCase().trim();
     const roleFilter = userRoleFilter?.value || "all";
     const statusFilter = userStatusFilter?.value || "all";
@@ -219,21 +245,13 @@ function setupAdminApp() {
     updateStatsCards(allUsers);
 
     // Filter list
-    const filtered = allUsers.filter((u) => {
-      const matchesSearch =
-        !query ||
-        (u.displayName && u.displayName.toLowerCase().includes(query)) ||
-        (u.email && u.email.toLowerCase().includes(query)) ||
-        (u.phone && u.phone.includes(query));
-
-      const matchesRole = roleFilter === "all" || u.role === roleFilter;
-      const matchesStatus = statusFilter === "all" || (u.status || "active") === statusFilter;
-
-      return matchesSearch && matchesRole && matchesStatus;
-    });
+    const filtered = filterUsers(allUsers, { search: query, role: roleFilter, status: statusFilter });
 
     const userCountBadge = document.getElementById("userCountBadge");
     if (userCountBadge) userCountBadge.textContent = filtered.length;
+    const page = paginate(filtered, userPage);
+    userPage = page.page;
+    updatePagination(userPagination, page);
 
     if (filtered.length === 0) {
       userTableBody.innerHTML = `
@@ -252,8 +270,9 @@ function setupAdminApp() {
       return;
     }
 
-    userTableBody.innerHTML = filtered
-      .map((u) => {
+    userTableBody.innerHTML = page.items
+      .map((record) => {
+        const u = { ...record, uid: escapeHtml(record.uid), displayName: escapeHtml(record.displayName), email: escapeHtml(record.email), phone: escapeHtml(record.phone), role: escapeHtml(record.role), roleLabel: escapeHtml(record.roleLabel), createdAt: escapeHtml(record.createdAt) };
         const isBlocked = u.status === "blocked";
         const roleLabel = ROLE_LABELS[u.role] || u.roleLabel || "Thành viên";
         const initial = (u.displayName || u.email).charAt(0).toUpperCase();
@@ -293,14 +312,14 @@ function setupAdminApp() {
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                   </svg>
                 </button>
-                <button type="button" class="btn-icon btn-toggle-status" data-uid="${u.uid}" title="${isBlocked ? "Mở khóa tài khoản" : "Tạm khóa tài khoản"}">
+                <button type="button" class="btn-icon btn-toggle-status" data-uid="${u.uid}" title="${isBlocked ? 'Mở khóa' : 'Tạm khóa'} ${accountFunctionsEnabled ? 'tài khoản' : 'hồ sơ'}">
                   ${
                     isBlocked
                       ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`
                       : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
                   }
                 </button>
-                <button type="button" class="btn-icon danger btn-delete-user" data-uid="${u.uid}" title="Xóa tài khoản">
+                <button type="button" class="btn-icon danger btn-delete-user" data-uid="${u.uid}" title="Xóa ${accountFunctionsEnabled ? 'tài khoản' : 'hồ sơ'}">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -345,46 +364,78 @@ function setupAdminApp() {
 
     // Toggle Status
     document.querySelectorAll(".btn-toggle-status").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         const uid = btn.dataset.uid;
-        const updated = toggleUserStatusByAdmin(uid);
+        btn.disabled = true;
+        try {
+        const existing = cloudUsers.find(user => user.uid === uid);
+        if (accountFunctionsEnabled) {
+          const action = existing?.status === 'blocked' ? 'enable' : 'disable';
+          const result = await manageUserAccount({ uid, action });
+          if (result.tokensRevoked === false) throw new Error('Tài khoản đã bị khóa nhưng chưa thu hồi được phiên đăng nhập; cần xử lý thủ công.');
+          if (!result.profileUpdated) throw new Error('Tài khoản Auth đã thay đổi nhưng hồ sơ chưa đồng bộ.');
+          showToast('Đã cập nhật tài khoản đăng nhập và hồ sơ.');
+          await refreshUsers();
+          return;
+        }
+        const updated = await toggleUserStatusByAdmin(uid, existing?.status || 'active');
         if (updated) {
           const statusText = updated.status === "blocked" ? "đã tạm khóa" : "đã kích hoạt lại";
-          showToast(`Tài khoản ${updated.displayName} ${statusText}.`);
-          renderUsersTable();
+          showToast(`Hồ sơ ${existing?.displayName || ''} ${statusText}; trạng thái đăng nhập chưa thay đổi.`);
+          await refreshUsers();
         }
+        } catch (error) {
+          console.error("Cập nhật trạng thái thất bại:", error);
+          showToast(error.message?.includes('đã thay đổi') || error.message?.includes('đã bị khóa') ? error.message : "Không thể cập nhật trạng thái hồ sơ.");
+        } finally { btn.disabled = false; }
       });
     });
 
     // Delete User
     document.querySelectorAll(".btn-delete-user").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         const uid = btn.dataset.uid;
-        const allUsers = getAllUsersList();
+        const allUsers = cloudUsers;
         const user = allUsers.find((u) => u.uid === uid);
         if (user && user.role === "admin") {
           showToast("Không thể xóa tài khoản Quản trị viên chính.");
           return;
         }
 
-        if (confirm(`Bạn có chắc chắn muốn xóa tài khoản "${user?.displayName || uid}" khỏi hệ thống?`)) {
-          deleteUserByAdmin(uid);
-          showToast("Đã xóa người dùng thành công.");
-          renderUsersTable();
+        const deleteMessage = accountFunctionsEnabled
+          ? `Xóa tài khoản đăng nhập và hồ sơ "${user?.displayName || uid}"?`
+          : `Xóa hồ sơ "${user?.displayName || uid}"? Tài khoản đăng nhập vẫn còn.`;
+        if (confirm(deleteMessage)) {
+          btn.disabled = true;
+          try {
+            if (accountFunctionsEnabled) {
+              const result = await manageUserAccount({ action: 'delete', uid });
+              if (!result.profileDeleted) throw new Error('Đã xóa tài khoản Auth nhưng chưa xóa được hồ sơ.');
+              showToast('Đã xóa tài khoản đăng nhập và hồ sơ.');
+            } else {
+              await deleteUserByAdmin(uid);
+              showToast("Đã xóa hồ sơ; tài khoản đăng nhập vẫn còn.");
+            }
+            await refreshUsers();
+          } catch (error) {
+            console.error("Xóa hồ sơ thất bại:", error);
+            showToast(error.message?.includes('Đã xóa tài khoản') ? error.message : "Không thể xóa hồ sơ người dùng.");
+          } finally { btn.disabled = false; }
         }
       });
     });
   }
 
   // Filter & Search events
-  userSearchInput?.addEventListener("input", renderUsersTable);
-  userRoleFilter?.addEventListener("change", renderUsersTable);
-  userStatusFilter?.addEventListener("change", renderUsersTable);
+  const resetUserPage = () => { userPage = 1; renderUsersTable(); };
+  userSearchInput?.addEventListener("input", resetUserPage);
+  userRoleFilter?.addEventListener("change", resetUserPage);
+  userStatusFilter?.addEventListener("change", resetUserPage);
 
   // 4. USER MODAL (ADD & EDIT)
   function openUserModalForAdd() {
     if (!modalBackdrop) return;
-    modalTitle.textContent = "Thêm Người Dùng Mới";
+    modalTitle.textContent = "Thêm Hồ Sơ Người Dùng";
     editUid.value = "";
     editFullName.value = "";
     editEmail.value = "";
@@ -392,12 +443,19 @@ function setupAdminApp() {
     editPhone.value = "";
     editRole.value = "parent";
     editStatus.value = "active";
+    document.getElementById('accountManagementHint').textContent = accountFunctionsEnabled
+      ? 'Tạo tài khoản đăng nhập và hồ sơ. Quyền admin được cấp riêng.'
+      : 'Thao tác này chỉ quản lý hồ sơ; không tạo, khóa hoặc xóa tài khoản đăng nhập.';
+    const passwordGroup = document.getElementById('groupUserPassword');
+    if (passwordGroup) passwordGroup.hidden = !accountFunctionsEnabled;
+    if (editPassword) { editPassword.value = ''; editPassword.required = accountFunctionsEnabled; }
+    editStatus.disabled = accountFunctionsEnabled;
     modalBackdrop.classList.add("active");
   }
 
   function openUserModalForEdit(uid) {
     if (!modalBackdrop) return;
-    const allUsers = getAllUsersList();
+    const allUsers = cloudUsers;
     const user = allUsers.find((u) => u.uid === uid);
     if (!user) return;
 
@@ -409,6 +467,13 @@ function setupAdminApp() {
     editPhone.value = user.phone || "";
     editRole.value = user.role || "parent";
     editStatus.value = user.status || "active";
+    document.getElementById('accountManagementHint').textContent = accountFunctionsEnabled
+      ? 'Sửa hồ sơ; dùng nút khóa hoặc mở khóa để thay đổi trạng thái đăng nhập.'
+      : 'Thao tác này chỉ quản lý hồ sơ; không thay đổi tài khoản đăng nhập.';
+    const passwordGroup = document.getElementById('groupUserPassword');
+    if (passwordGroup) passwordGroup.hidden = true;
+    if (editPassword) { editPassword.value = ''; editPassword.required = false; }
+    editStatus.disabled = accountFunctionsEnabled;
     modalBackdrop.classList.add("active");
   }
 
@@ -423,7 +488,7 @@ function setupAdminApp() {
     if (e.target === modalBackdrop) closeUserModal();
   });
 
-  formUserSave?.addEventListener("submit", (e) => {
+  formUserSave?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const uid = editUid.value;
     const displayName = editFullName.value.trim();
@@ -437,7 +502,12 @@ function setupAdminApp() {
       return;
     }
 
-    saveUserByAdmin({
+    btnSubmitUserModal.disabled = true;
+    try {
+    if (!uid && accountFunctionsEnabled) {
+      const result = await manageUserAccount({ action: 'create', email, password: editPassword.value, displayName, phone, role });
+      if (!result.profileCreated) throw new Error('Tài khoản được tạo nhưng hồ sơ chưa được lưu; cần xử lý thủ công.');
+    } else await saveUserByAdmin({
       uid: uid || null,
       displayName,
       email,
@@ -447,27 +517,20 @@ function setupAdminApp() {
     });
 
     closeUserModal();
-    showToast(uid ? "Đã cập nhật thông tin người dùng!" : "Đã thêm người dùng mới thành công!");
-    renderUsersTable();
+    showToast(uid ? "Đã cập nhật hồ sơ người dùng." : accountFunctionsEnabled ? "Đã tạo tài khoản và hồ sơ." : "Đã thêm hồ sơ; chưa tạo tài khoản đăng nhập.");
+    await refreshUsers();
+    } catch (error) {
+      console.error("Lưu hồ sơ thất bại:", error);
+      showToast(error.message?.includes('được tạo') ? error.message : "Không thể lưu hồ sơ người dùng.");
+    } finally { btnSubmitUserModal.disabled = false; }
   });
 
   // 5. EXPORT USERS TO CSV
-  btnExportUsersCSV?.addEventListener("click", () => {
-    const allUsers = getAllUsersList();
-    let csvContent = "\uFEFFUID,Họ Tên,Email,Số Điện Thoại,Vai Trò,Trạng Thái,Ngày Tham Gia\n";
-
-    allUsers.forEach((u) => {
-      const row = [
-        `"${u.uid}"`,
-        `"${u.displayName || ""}"`,
-        `"${u.email}"`,
-        `"${u.phone || ""}"`,
-        `"${ROLE_LABELS[u.role] || u.role}"`,
-        `"${u.status === "blocked" ? "Tạm khóa" : "Hoạt động"}"`,
-        `"${u.createdAt || ""}"`
-      ];
-      csvContent += row.join(",") + "\n";
-    });
+  btnExportUsersCSV?.addEventListener("click", async () => {
+    btnExportUsersCSV.disabled = true;
+    try {
+    const allUsers = await fetchAllCloudUsers();
+    const csvContent = createUsersCsv(allUsers, ROLE_LABELS);
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -477,42 +540,40 @@ function setupAdminApp() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast("Đã tải danh sách người dùng về máy (File CSV)!");
+    URL.revokeObjectURL(url);
+    showToast(`Đã xuất ${allUsers.length} người dùng từ Cloud.`);
+    } catch (error) {
+      console.error("Không xuất được người dùng từ Cloud:", error);
+      showToast("Không xuất được CSV từ Cloud. Hãy kiểm tra kết nối và quyền truy cập.");
+    } finally {
+      btnExportUsersCSV.disabled = false;
+    }
   });
 
   // 5.1 SYNC CLOUD FIRESTORE USERS (ĐỒNG BỘ ĐA MÁY)
-  btnSyncFirestore?.addEventListener("click", async () => {
+  async function refreshUsers() {
+    const callerUid = currentAdminUser?.uid;
     btnSyncFirestore.disabled = true;
     btnSyncFirestore.classList.add("spinning");
     showToast("Đang đồng bộ người dùng từ Cloud Firestore...");
 
     try {
-      const res = await syncUsersWithFirestore();
+      const users = await fetchAllCloudUsers();
+      if (!currentAdminUser?.isAdmin || currentAdminUser.uid !== callerUid) return;
+      cloudUsers = users;
       renderUsersTable();
-
-      if (res && res.success) {
-        if (res.cloudCount > 0) {
-          showToast(`Đồng bộ thành công! Tìm thấy ${res.cloudCount} tài khoản trên Cloud (${res.newAdded || 0} mới).`);
-        } else {
-          showToast("Đồng bộ hoàn tất. Chưa có thêm tài khoản mới nào trên Cloud Firestore.");
-        }
-      } else if (res && res.error) {
-        if (res.error.code === "permission-denied") {
-          showToast("Quyền Firestore bị chặn! Hãy cập nhật file firestore.rules trên Firebase Console.");
-        } else {
-          showToast(`Chưa thể đồng bộ: ${res.error.message || "Lỗi kết nối Firebase"}`);
-        }
-      } else {
-        showToast("Đã đồng bộ xong danh sách người dùng từ Cloud.");
-      }
+      document.getElementById("userCloudStatus").textContent = `Đã tải ${users.length} hồ sơ cloud lúc ${new Date().toLocaleTimeString('vi-VN')}. Làm mới để xem thay đổi sau đó.`;
+      showToast(`Đã tải ${users.length} hồ sơ từ Cloud.`);
     } catch (err) {
+      document.getElementById("userCloudStatus").textContent = "Không tải được dữ liệu cloud; danh sách trước đó có thể đã cũ.";
       console.error("Lỗi đồng bộ users:", err);
       showToast("Lỗi khi kết nối Cloud Firestore. Vui lòng kiểm tra Rules trên Console.");
     } finally {
       btnSyncFirestore.disabled = false;
       btnSyncFirestore.classList.remove("spinning");
     }
-  });
+  }
+  btnSyncFirestore?.addEventListener("click", refreshUsers);
 
   // 5.2 SYNC CLOUD FIRESTORE BOOKINGS & LEADS
   btnSyncBookingsFirestore?.addEventListener("click", async () => {
@@ -521,12 +582,18 @@ function setupAdminApp() {
     showToast("Đang đồng bộ yêu cầu tư vấn & lịch hẹn từ Cloud...");
 
     try {
-      await syncActivitiesWithFirestore();
+      const res = await syncActivitiesWithFirestore({ reset: !bookingCloudHasMore });
+      bookingCloudHasMore = res.hasMore;
+      document.getElementById("bookingCloudButtonLabel").textContent = res.hasMore ? "Tải thêm từ Cloud" : "Tải lại từ đầu";
+      document.getElementById("bookingCloudStatus").textContent = (res.hasMore ? "Còn dữ liệu cloud chưa tải. " : "Đã duyệt hết dữ liệu cloud. ") + "Bộ lọc chỉ áp dụng cho dữ liệu đã tải hoặc lưu trên trình duyệt.";
       renderBookingsTable();
-      showToast("Đồng bộ lịch hẹn và yêu cầu tư vấn từ Cloud thành công!");
+      showToast(`Đã tải ${res.cloudCount} lịch hẹn và yêu cầu từ Cloud.`);
     } catch (err) {
+      document.getElementById("bookingCloudStatus").textContent = "Không tải được dữ liệu cloud; đang hiển thị dữ liệu đã lưu trên trình duyệt.";
       console.error("Lỗi đồng bộ activities:", err);
-      showToast("Lỗi khi đồng bộ lịch hẹn từ Cloud Firestore.");
+      showToast(err.code === "permission-denied"
+        ? "Firebase từ chối đọc lịch hẹn và yêu cầu tư vấn. Kiểm tra quyền truy cập."
+        : "Lỗi khi đồng bộ lịch hẹn từ Cloud Firestore.");
     } finally {
       btnSyncBookingsFirestore.disabled = false;
       btnSyncBookingsFirestore.classList.remove("spinning");
@@ -540,11 +607,10 @@ function setupAdminApp() {
     const typeFilter = bookingTypeFilter?.value || "all";
     const statusFilter = bookingStatusFilter?.value || "all";
 
-    const filtered = allItems.filter((item) => {
-      const matchType = typeFilter === "all" || item.type === typeFilter;
-      const matchStatus = statusFilter === "all" || item.status === statusFilter;
-      return matchType && matchStatus;
-    });
+    const filtered = filterActivities(allItems, { type: typeFilter, status: statusFilter });
+    const page = paginate(filtered, bookingPage);
+    bookingPage = page.page;
+    updatePagination(bookingPagination, page);
 
     if (filtered.length === 0) {
       bookingsTableBody.innerHTML = `
@@ -559,17 +625,18 @@ function setupAdminApp() {
       return;
     }
 
-    bookingsTableBody.innerHTML = filtered
+    bookingsTableBody.innerHTML = page.items
       .map((item) => {
         const isBooking = item.type === "booking";
         const typeBadge = isBooking
           ? `<span class="badge-role center">Đặt lịch can thiệp 1-1</span>`
           : `<span class="badge-role parent">Đăng ký tư vấn</span>`;
 
-        const clientName = item.data?.parentName || item.data?.name || item.userName || "Khách hàng";
-        const clientPhone = item.data?.parentPhone || item.data?.phone || "Chưa có SĐT";
-        const centerName = item.data?.targetCenter || (isBooking ? "Trung tâm đối tác" : "Hệ thống EduTrace AI");
-        const extraNote = item.data?.childInfo || (item.data?.role ? `Vai trò: ${item.data.role}` : "");
+        const clientName = escapeHtml(item.data?.parentName || item.data?.name || item.userName || "Khách hàng");
+        const clientPhone = escapeHtml(item.data?.parentPhone || item.data?.phone || "Chưa có SĐT");
+        const centerName = escapeHtml(item.data?.targetCenter || (isBooking ? "Trung tâm đối tác" : "Hệ thống EduTrace AI"));
+        const extraNote = escapeHtml(item.data?.childInfo || (item.data?.role ? `Vai trò: ${item.data.role}` : ""));
+        const itemId = escapeHtml(item.id);
 
         return `
           <tr>
@@ -583,17 +650,17 @@ function setupAdminApp() {
               ${extraNote ? `<div style="font-size: 0.74rem; color: #475569;">${extraNote}</div>` : ""}
             </td>
             <td>
-              <span style="font-size: 0.8rem; color: #64748b;">${item.createdAt}</span>
+              <span style="font-size: 0.8rem; color: #64748b;">${escapeHtml(item.createdAt)}</span>
             </td>
             <td>
-              <select class="filter-select update-status-select" data-id="${item.id}" style="padding: 4px 8px; font-size: 0.78rem;">
+              <select class="filter-select update-status-select" data-id="${itemId}" data-type="${isBooking ? "booking" : "consultation"}" style="padding: 4px 8px; font-size: 0.78rem;">
                 <option value="pending" ${item.status === "pending" ? "selected" : ""}>🟡 Chờ tiếp nhận</option>
                 <option value="contacted" ${item.status === "contacted" ? "selected" : ""}>🔵 Đã liên hệ</option>
                 <option value="confirmed" ${item.status === "confirmed" ? "selected" : ""}>🟢 Đã xác nhận</option>
               </select>
             </td>
             <td style="text-align: right;">
-              <button type="button" class="btn btn-sm btn-outline-light btn-view-booking-detail" data-id="${item.id}" style="color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">
+              <button type="button" class="btn btn-sm btn-outline-light btn-view-booking-detail" data-id="${itemId}" style="color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">
                 Chi tiết
               </button>
             </td>
@@ -604,11 +671,21 @@ function setupAdminApp() {
 
     // Status change listener
     document.querySelectorAll(".update-status-select").forEach((sel) => {
-      sel.addEventListener("change", (e) => {
+      sel.addEventListener("change", async (e) => {
         const id = sel.dataset.id;
+        const type = sel.dataset.type;
         const newStatus = e.target.value;
-        updateActivityStatus(id, newStatus);
-        showToast("Đã cập nhật trạng thái đơn!");
+        sel.disabled = true;
+        try {
+          const updated = await updateActivityStatus(id, type, newStatus);
+          if (!updated) throw new Error("Không tìm thấy yêu cầu.");
+          showToast("Đã đồng bộ trạng thái lên Cloud.");
+        } catch (error) {
+          console.error("Không thể cập nhật trạng thái:", error);
+          showToast("Không thể đồng bộ trạng thái. Kiểm tra quyền và kết nối.");
+        } finally {
+          renderBookingsTable();
+        }
       });
     });
 
@@ -624,8 +701,9 @@ function setupAdminApp() {
     });
   }
 
-  bookingTypeFilter?.addEventListener("change", renderBookingsTable);
-  bookingStatusFilter?.addEventListener("change", renderBookingsTable);
+  const resetBookingPage = () => { bookingPage = 1; renderBookingsTable(); };
+  bookingTypeFilter?.addEventListener("change", resetBookingPage);
+  bookingStatusFilter?.addEventListener("change", resetBookingPage);
 
   // 7. AI KNOWLEDGE HUB & GEMINI MANAGEMENT
   function initAdminAIKnowledgeHub() {
@@ -672,7 +750,7 @@ function setupAdminApp() {
     btnAdminSaveGeminiKey?.addEventListener("click", () => {
       if (!window.geminiService || !adminGeminiKeyInput) return;
       const key = adminGeminiKeyInput.value.trim();
-      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : "gemini-1.5-flash";
+      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : window.geminiService.DEFAULT_MODEL;
 
       window.geminiService.setApiKey(key);
       window.geminiService.setModel(model);
@@ -689,7 +767,7 @@ function setupAdminApp() {
     btnAdminTestGeminiPing?.addEventListener("click", async () => {
       if (!window.geminiService || !adminGeminiKeyInput) return;
       const key = adminGeminiKeyInput.value.trim();
-      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : "gemini-1.5-flash";
+      const model = adminGeminiModelSelect ? adminGeminiModelSelect.value : window.geminiService.DEFAULT_MODEL;
 
       if (!key) {
         showToast("Vui lòng nhập API Key để kiểm tra kết nối!");
@@ -1121,15 +1199,23 @@ function setupAdminApp() {
         return;
       }
 
-      adminKnowledgeTableBody.innerHTML = list.map((item) => {
+      adminKnowledgeTableBody.innerHTML = list.map((rawItem) => {
+        const item = {
+          ...rawItem,
+          id: escapeHtml(rawItem.id),
+          title: escapeHtml(rawItem.title),
+          category: escapeHtml(rawItem.category),
+          content: escapeHtml(rawItem.content),
+          author: escapeHtml(rawItem.author)
+        };
         // Render huy hiệu tệp đính kèm
         let mediaHtml = '<div style="display: flex; flex-direction: column; gap: 4px;">';
         if (item.file) {
           const fileName = item.file.name || "Tài liệu";
           const shortName = fileName.length > 18 ? fileName.slice(0, 15) + "..." : fileName;
           mediaHtml += `
-            <button type="button" class="btn-preview-file" data-id="${item.id}" title="Bấm để xem/tải: ${fileName}">
-              📄 ${shortName}
+            <button type="button" class="btn-preview-file" data-id="${item.id}" title="Bấm để xem/tải: ${escapeHtml(fileName)}">
+              📄 ${escapeHtml(shortName)}
             </button>
           `;
         }
@@ -1137,8 +1223,8 @@ function setupAdminApp() {
           const vTitle = item.video.title || "Video";
           const shortTitle = vTitle.length > 18 ? vTitle.slice(0, 15) + "..." : vTitle;
           mediaHtml += `
-            <button type="button" class="btn-preview-video" data-id="${item.id}" title="Bấm để xem thử: ${vTitle}">
-              🎬 ${item.video.youtubeId ? "YouTube" : "Video"}: ${shortTitle}
+            <button type="button" class="btn-preview-video" data-id="${item.id}" title="Bấm để xem thử: ${escapeHtml(vTitle)}">
+              🎬 ${item.video.youtubeId ? "YouTube" : "Video"}: ${escapeHtml(shortTitle)}
             </button>
           `;
         }

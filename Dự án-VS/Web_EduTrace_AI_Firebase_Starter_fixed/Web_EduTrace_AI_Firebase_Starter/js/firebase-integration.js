@@ -11,6 +11,7 @@ import {
 import { firebaseConfig, firebaseConfigured } from "./firebase-config.js";
 import { recordUserActivity } from "./firebase-auth.js";
 import "./auth-ui.js";
+import "./gemini-cloud-client.js";
 
 if (firebaseConfigured) {
   const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -49,17 +50,24 @@ if (firebaseConfigured) {
     window.setTimeout(() => toast.classList.remove("show"), 4500);
   }
 
-  async function submitToFirestore(form, collectionName, buildPayload, successMessage) {
+  async function submitToFirestore(form, collectionName, payload, activityType, successMessage) {
+    const button = form.querySelector('button[type="submit"]');
+    if (button?.disabled) return false;
     setBusy(form, true);
     try {
-      const payload = buildPayload();
-      await addDoc(collection(db, collectionName), {
+      const created = await addDoc(collection(db, collectionName), {
         ...payload,
         createdAt: serverTimestamp(),
         source: "edutrace-ai-website"
       });
+      try {
+        recordUserActivity(activityType, payload, created.id);
+      } catch (error) {
+        console.warn("Không lưu được lịch sử trên trình duyệt:", error);
+      }
       form.reset();
       showSafeToast(successMessage);
+      return true;
     } catch (error) {
       console.error("EduTrace Firebase submission failed:", error.code || error.message);
       showSafeToast(
@@ -67,13 +75,14 @@ if (firebaseConfigured) {
           ? "Firebase đã từ chối lưu dữ liệu. Hãy kiểm tra Firestore Security Rules."
           : "Chưa gửi được thông tin. Vui lòng thử lại sau."
       );
+      return false;
     } finally {
       setBusy(form, false);
     }
   }
 
   // Capture phase prevents the demo's localStorage/toast-only handlers from duplicate running.
-  document.addEventListener("submit", (event) => {
+  document.addEventListener("submit", async (event) => {
     const form = event.target;
     if (!(form instanceof HTMLFormElement)) return;
 
@@ -88,12 +97,11 @@ if (firebaseConfigured) {
         role: formValue(form, "role")
       };
 
-      recordUserActivity("consultation", payload);
-
       void submitToFirestore(
         form,
         "leads",
-        () => payload,
+        payload,
+        "consultation",
         "Cảm ơn bạn! Thông tin liên hệ đã được gửi tới EduTrace AI."
       );
     }
@@ -110,17 +118,16 @@ if (firebaseConfigured) {
         status: "pending"
       };
 
-      recordUserActivity("booking", payload);
-
-      void submitToFirestore(
+      const saved = await submitToFirestore(
         form,
         "bookingRequests",
-        () => payload,
+        payload,
+        "booking",
         "Đã gửi yêu cầu đặt lịch hẹn 1-1. Trung tâm sẽ liên hệ xác nhận trong 24h."
       );
 
       const modal = document.getElementById("centerBookingModal");
-      if (modal) {
+      if (saved && modal) {
         modal.classList.remove("active");
         document.body.style.overflow = "auto";
       }
